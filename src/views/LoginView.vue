@@ -58,6 +58,11 @@ const handleLogin = async () => {
 
 <style scoped>
 .login-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
   padding: 2rem;
   max-width: 320px;
   margin: 0 auto;

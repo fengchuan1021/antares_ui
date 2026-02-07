@@ -1,62 +1,33 @@
 <template>
-  <div class="admin-view p-4">
-    <h1 class="text-xl font-semibold mb-4">管理</h1>
-
-    <div class="flex gap-2 mb-4">
-      <Button
-        label="读取手机中已安装app"
-        icon="pi pi-refresh"
-        :loading="loading"
-        :disabled="!isInWebView"
-        @click="loadInstalledApps"
-      />
-      <Button
-        label="保存"
-        icon="pi pi-save"
-        :loading="saving"
-        :disabled="!apps.length"
-        severity="success"
-        @click="saveApplications"
-      />
+  <div class="admin-view">
+    <div v-if="currentMenu === null" class="menu-list p-4">
+      <h1 class="text-xl font-semibold mb-4">管理</h1>
+      <div class="menu-grid">
+        <div
+          v-for="item in menuItems"
+          :key="item.id"
+          class="menu-item"
+          @click="currentMenu = item.id"
+        >
+          <i :class="['pi', item.icon, 'menu-icon']"></i>
+          <span class="menu-label">{{ item.label }}</span>
+          <i class="pi pi-chevron-right menu-arrow"></i>
+        </div>
+      </div>
     </div>
-
-    <Message v-if="errorMsg" severity="error" :closable="false" class="mb-4">
-      {{ errorMsg }}
-    </Message>
-    <Message v-else-if="successMsg" severity="success" :closable="false" class="mb-4">
-      {{ successMsg }}
-    </Message>
-    <Message v-else-if="!isInWebView && !apps.length" severity="info" :closable="false" class="mb-4">
-      请在手机应用中打开此页面
-    </Message>
-
-    <div v-if="apps.length" class="app-list space-y-2">
-      <Card v-for="app in apps" :key="app.packageName" class="app-item">
-        <template #content>
-          <div class="flex items-center gap-3">
-            <img
-              v-if="app.iconBase64"
-              :src="app.iconBase64"
-              :alt="app.name"
-              class="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-            />
-            <div class="flex-1 min-w-0">
-              <div class="font-medium truncate">{{ app.name }}</div>
-              <div class="text-sm opacity-70 truncate">{{ app.packageName }}</div>
-            </div>
-            <div class="flex gap-4 flex-shrink-0">
-              <div class="flex items-center gap-1">
-                <Checkbox v-model="app.toClean" :binary="true" :input-id="`clean-${app.packageName}`" />
-                <label :for="`clean-${app.packageName}`" class="text-sm cursor-pointer">被清理</label>
-              </div>
-              <div class="flex items-center gap-1">
-                <Checkbox v-model="app.backupData" :binary="true" :input-id="`backup-${app.packageName}`" />
-                <label :for="`backup-${app.packageName}`" class="text-sm cursor-pointer">备份数据</label>
-              </div>
-            </div>
-          </div>
-        </template>
-      </Card>
+    <div v-else class="menu-content">
+      <div class="menu-header">
+        <Button
+          icon="pi pi-arrow-left"
+          text
+          rounded
+          @click="currentMenu = null"
+        />
+        <span class="menu-title">{{ currentMenuLabel }}</span>
+      </div>
+      <div class="menu-body">
+        <component :is="currentComponent" />
+      </div>
     </div>
   </div>
 </template>
@@ -64,73 +35,98 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Button from 'primevue/button'
-import Card from 'primevue/card'
-import Checkbox from 'primevue/checkbox'
-import Message from 'primevue/message'
-import { saveApplications as saveAppsApi } from '../api/application'
+import ApplicationManagerView from './admin/ApplicationManagerView.vue'
+import AddUserView from './admin/AddUserView.vue'
+import DeviceActivationView from './admin/DeviceActivationView.vue'
+import DomainBlacklistView from './admin/DomainBlacklistView.vue'
+import CustomerManagementView from './admin/CustomerManagementView.vue'
 
-const loading = ref(false)
-const saving = ref(false)
-const errorMsg = ref('')
-const successMsg = ref('')
-const apps = ref([])
+const menuItems = [
+  { id: 'app', label: 'app管理', icon: 'pi-mobile', component: ApplicationManagerView },
+  { id: 'user', label: '添加用户', icon: 'pi-user-plus', component: AddUserView },
+  { id: 'device', label: '设备激活', icon: 'pi-tablet', component: DeviceActivationView },
+  { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },
+  { id: 'customer', label: '客户管理', icon: 'pi-users', component: CustomerManagementView }
+]
 
-const isInWebView = computed(() => typeof window !== 'undefined' && !!window.AndroidBridge)
+const currentMenu = ref(null)
 
-const loadInstalledApps = async () => {
-  if (!isInWebView.value) {
-    errorMsg.value = '请在手机应用中打开此页面'
-    return
-  }
-  loading.value = true
-  errorMsg.value = ''
-  try {
-    const json = window.AndroidBridge.getInstalledApps()
-    const res = JSON.parse(json)
-    if (res.code === 0 && Array.isArray(res.data)) {
-      apps.value = res.data.map(a => ({
-        ...a,
-        toClean: false,
-        backupData: false
-      }))
-    } else {
-      errorMsg.value = '获取失败'
-    }
-  } catch (e) {
-    errorMsg.value = e?.message || '读取失败'
-  } finally {
-    loading.value = false
-  }
-}
+const currentMenuLabel = computed(() => {
+  const item = menuItems.find(m => m.id === currentMenu.value)
+  return item?.label ?? ''
+})
 
-const saveApplications = async () => {
-  if (!apps.value.length) return
-  saving.value = true
-  errorMsg.value = ''
-  successMsg.value = ''
-  try {
-    const payload = apps.value.map(a => ({
-      packageName: a.packageName,
-      name: a.name,
-      iconBase64: a.iconBase64 || '',
-      toClean: a.toClean,
-      backupData: a.backupData
-    }))
-    await saveAppsApi(payload)
-    successMsg.value = '保存成功'
-  } catch (e) {
-    errorMsg.value = e?.response?.data?.error || e?.message || '保存失败'
-  } finally {
-    saving.value = false
-  }
-}
+const currentComponent = computed(() => {
+  const item = menuItems.find(m => m.id === currentMenu.value)
+  return item?.component ?? null
+})
 </script>
 
 <style scoped>
-.app-item :deep(.p-card-content) {
-  padding: 0.75rem 1rem;
+.admin-view {
+  min-height: 100%;
 }
-.app-item :deep(.p-card) {
-  margin-bottom: 0;
+.menu-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.menu-item:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+.menu-icon {
+  font-size: 1.25rem;
+  color: var(--p-primary-color);
+}
+.menu-label {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.menu-arrow {
+  font-size: 0.875rem;
+  opacity: 0.5;
+}
+.menu-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+.menu-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.menu-body {
+  flex: 1;
+  overflow-y: auto;
+}
+@media (prefers-color-scheme: light) {
+  .menu-item {
+    background: rgba(0, 0, 0, 0.04);
+  }
+  .menu-item:active {
+    background: rgba(0, 0, 0, 0.08);
+  }
+  .menu-header {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

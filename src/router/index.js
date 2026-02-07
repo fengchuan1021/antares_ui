@@ -40,7 +40,12 @@ router.beforeEach(async (to) => {
     return true
   }
 
-  const token = localStorage.getItem('token')
+  let token
+  try {
+    token = localStorage?.getItem?.('token') ?? null
+  } catch {
+    token = null
+  }
   if (!token) {
     return '/login'
   }
@@ -48,7 +53,7 @@ router.beforeEach(async (to) => {
   // 管理页仅 role_id === 1 可访问
   if (to.path === '/admin') {
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}')
+      const user = JSON.parse((localStorage?.getItem?.('user')) || '{}')
       if (user.role_id !== 1) {
         return '/'
       }

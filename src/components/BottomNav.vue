@@ -9,7 +9,7 @@
       <span class="nav-label">首页</span>
     </router-link>
     <router-link
-      v-if="isAdmin"
+      v-if="userStore.isAdmin"
       to="/admin"
       class="nav-item"
       :class="{ active: $route.path === '/admin' }"
@@ -29,10 +29,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { userStore } from '../stores/user'
+import { useUserStore } from '../stores/user'
 
-const isAdmin = computed(() => userStore.value?.role_id === 1)
+const userStore = useUserStore()
 </script>
 
 <style scoped>

@@ -28,7 +28,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '../api/user'
-import { setUser } from '../stores/user'
+import { useUserStore } from '../stores/user'
 
 const router = useRouter()
 const username = ref('')
@@ -43,9 +43,9 @@ const handleLogin = async () => {
   try {
     const res = await login(username.value, password.value)
     localStorage.setItem('token', res.data.token)
+    const userStore = useUserStore()
     if (res.data.user) {
-      localStorage.setItem('user', JSON.stringify(res.data.user))
-      setUser(res.data.user)
+      userStore.setUser(res.data.user)
     }
     router.push('/')
   } catch (error) {

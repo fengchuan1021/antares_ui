@@ -9,7 +9,7 @@ const showBottomNav = computed(() => route.path !== '/login')
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserProfile } from './api/user'
-import { setUser, loadUserFromStorage } from './stores/user'
+import { useUserStore } from './stores/user'
 const router = useRouter()
 
 onMounted(async () => {
@@ -18,17 +18,15 @@ onMounted(async () => {
     router.push('/login')
     return
   }
-  loadUserFromStorage()
+  const userStore = useUserStore()
+  userStore.loadUserFromStorage()
   try {
     const res = await getUserProfile()
     if (res?.data) {
-      localStorage.setItem('user', JSON.stringify(res.data))
-      setUser(res.data)
+      userStore.setUser(res.data)
     }
   } catch {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
+    userStore.logout()
     router.push('/login')
   }
 })

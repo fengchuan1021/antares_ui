@@ -1,0 +1,7 @@
+---
+globs: *.vue
+alwaysApply: false
+---
+# Overview
+
+使用vue3 setup语法糖,primevue,tailwindcss. 这是一个移动端项目,只需要考虑移动端,请不要考虑桌面端.

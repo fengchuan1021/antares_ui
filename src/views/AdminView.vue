@@ -44,7 +44,7 @@ import CustomerManagementView from './admin/CustomerManagementView.vue'
 const menuItems = [
   { id: 'app', label: 'app管理', icon: 'pi-mobile', component: ApplicationManagerView },
   { id: 'user', label: '添加用户', icon: 'pi-user-plus', component: AddUserView },
-  { id: 'device', label: '设备激活', icon: 'pi-tablet', component: DeviceActivationView },
+  { id: 'device', label: '设备激活续费', icon: 'pi-tablet', component: DeviceActivationView },
   { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },
   { id: 'customer', label: '客户管理', icon: 'pi-users', component: CustomerManagementView }
 ]

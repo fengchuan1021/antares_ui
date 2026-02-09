@@ -9,6 +9,12 @@ const routes = [
     meta: { title: '首页' }
   },
   {
+    path: '/backup',
+    name: 'backup',
+    component: () => import('../views/BackupView.vue'),
+    meta: { title: '备份' }
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: () => import('../views/ProfileView.vue'),

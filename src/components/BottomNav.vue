@@ -9,6 +9,14 @@
       <span class="nav-label">首页</span>
     </router-link>
     <router-link
+      to="/backup"
+      class="nav-item"
+      :class="{ active: $route.path === '/backup' }"
+    >
+      <span class="nav-icon">📦</span>
+      <span class="nav-label">备份</span>
+    </router-link>
+    <router-link
       v-if="userStore.isAdmin"
       to="/admin"
       class="nav-item"

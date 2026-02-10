@@ -37,6 +37,7 @@ import { ref, computed } from 'vue'
 import Button from 'primevue/button'
 import ApplicationManagerView from './admin/ApplicationManagerView.vue'
 import ScriptCategoryManagerView from './admin/ScriptCategoryManagerView.vue'
+import ScriptManagerView from './admin/ScriptManagerView.vue'
 import AddUserView from './admin/AddUserView.vue'
 import DeviceActivationView from './admin/DeviceActivationView.vue'
 import DomainBlacklistView from './admin/DomainBlacklistView.vue'
@@ -44,7 +45,8 @@ import CustomerManagementView from './admin/CustomerManagementView.vue'
 
 const menuItems = [
   { id: 'app', label: 'app管理', icon: 'pi-mobile', component: ApplicationManagerView },
-  { id: 'scriptCategory', label: '脚本分类', icon: 'pi-folder', component: ScriptCategoryManagerView },
+  // { id: 'scriptCategory', label: '脚本分类', icon: 'pi-folder', component: ScriptCategoryManagerView },
+  // { id: 'script', label: '脚本管理', icon: 'pi-code', component: ScriptManagerView },
   { id: 'user', label: '添加用户', icon: 'pi-user-plus', component: AddUserView },
   { id: 'device', label: '设备激活续费', icon: 'pi-tablet', component: DeviceActivationView },
   { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },

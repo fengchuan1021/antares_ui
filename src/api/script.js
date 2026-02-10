@@ -4,6 +4,14 @@ export function getScriptsTree() {
   return request.get('/api/scripts_tree')
 }
 
+export function getScripts() {
+  return request.get('/api/scripts')
+}
+
+export function updateScriptCategoryOnly(id, categoryId) {
+  return request.patch(`/api/scripts/${id}/category`, { category_id: categoryId })
+}
+
 export function getScriptCategories() {
   return request.get('/api/script_categories')
 }

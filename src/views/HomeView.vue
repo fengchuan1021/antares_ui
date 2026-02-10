@@ -1,6 +1,6 @@
 <template>
   <div class="home-view p-4 pb-[140px]">
-    <div class="flex gap-2 mb-4">
+    <div class="flex gap-2 mb-4 mt-6">
       <Button
         label="更新证书"
         icon="pi pi-refresh"

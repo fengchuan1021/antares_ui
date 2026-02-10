@@ -1,7 +1,7 @@
 <template>
   <div class="admin-view">
-    <div v-if="currentMenu === null" class="menu-list p-4">
-      <h1 class="text-xl font-semibold mb-4">管理</h1>
+    <div v-if="currentMenu === null" class="menu-list p-4 mt-6">
+      <h1 class="text-xl font-semibold mb-4 ">管理</h1>
       <div class="menu-grid">
         <div
           v-for="item in menuItems"
@@ -15,7 +15,7 @@
         </div>
       </div>
     </div>
-    <div v-else class="menu-content">
+    <div v-else class="menu-content mt-6">
       <div class="menu-header">
         <Button
           icon="pi pi-arrow-left"
@@ -36,6 +36,7 @@
 import { ref, computed } from 'vue'
 import Button from 'primevue/button'
 import ApplicationManagerView from './admin/ApplicationManagerView.vue'
+import ScriptCategoryManagerView from './admin/ScriptCategoryManagerView.vue'
 import AddUserView from './admin/AddUserView.vue'
 import DeviceActivationView from './admin/DeviceActivationView.vue'
 import DomainBlacklistView from './admin/DomainBlacklistView.vue'
@@ -43,6 +44,7 @@ import CustomerManagementView from './admin/CustomerManagementView.vue'
 
 const menuItems = [
   { id: 'app', label: 'app管理', icon: 'pi-mobile', component: ApplicationManagerView },
+  { id: 'scriptCategory', label: '脚本分类', icon: 'pi-folder', component: ScriptCategoryManagerView },
   { id: 'user', label: '添加用户', icon: 'pi-user-plus', component: AddUserView },
   { id: 'device', label: '设备激活续费', icon: 'pi-tablet', component: DeviceActivationView },
   { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },

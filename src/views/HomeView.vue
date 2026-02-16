@@ -80,9 +80,9 @@
       </Card>
     </template>
 
-    <div class="execute-bar fixed bottom-14 left-0 right-0 flex items-center gap-4 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
-      <div class="flex-1 flex gap-4">
-        <div class="flex-1 flex flex-col gap-2">
+    <div class="execute-bar fixed bottom-14 left-0 right-0 flex items-end gap-2 p-2 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
+      <div class="flex-1 grid grid-cols-2 gap-2 min-w-0">
+        <div class="min-w-0 flex flex-col gap-2 overflow-hidden">
           <label class="text-sm text-gray-600 dark:text-gray-400">执行时间</label>
           <InputNumber
             v-model="executeTime"
@@ -90,10 +90,10 @@
             placeholder="分钟"
             show-buttons
             button-layout="horizontal"
-            class="w-full"
+            class="w-full min-w-0 max-w-full [&_.p-inputnumber]:min-w-0 [&_.p-inputnumber]:max-w-full"
           />
         </div>
-        <div class="flex-1 flex flex-col gap-2">
+        <div class="min-w-0 flex flex-col gap-2 overflow-hidden">
           <label class="text-sm text-gray-600 dark:text-gray-400">执行轮数</label>
           <InputNumber
             v-model="executeRounds"
@@ -101,7 +101,7 @@
             placeholder="轮"
             show-buttons
             button-layout="horizontal"
-            class="w-full"
+            class="w-full min-w-0 max-w-full [&_.p-inputnumber]:min-w-0 [&_.p-inputnumber]:max-w-full"
           />
         </div>
       </div>
@@ -140,8 +140,8 @@ const selectedScriptsMap = ref(new Map())
 
 const selectedScripts = computed(() => Array.from(selectedScriptsMap.value.values()))
 
-const executeTime = ref(null)
-const executeRounds = ref(null)
+const executeTime = ref(120)
+const executeRounds = ref(2)
 
 function handleUpdateCert() {
   // TODO: 调用更新证书接口
@@ -149,10 +149,7 @@ function handleUpdateCert() {
 }
 
 function handleRestart() {
-  if (typeof window.AndroidBridge === 'undefined') {
-    alert('请在 Android 应用中打开此页面')
-    return
-  }
+  
   try {
     const result = JSON.parse(window.AndroidBridge.reboot())
     if (result.code === 0) {
@@ -207,4 +204,13 @@ onMounted(async () => {
   }
 })
 </script>
+<style scoped>
+.execute-bar :deep(.p-inputnumber) {
+  min-width: 0;
+  max-width: 100%;
+}
+.execute-bar :deep(.p-inputnumber input) {
+  min-width: 0;
+}
+</style>
 

@@ -8,8 +8,16 @@
         size="small"
         @click="handleUpdateCert"
       />
+
       <Button
-        label="重启"
+        label="重启服务"
+        icon="pi pi-replay"
+        severity="secondary"
+        size="small"
+        @click="handleRestartService"
+      />
+      <Button
+        label="重启手机"
         icon="pi pi-replay"
         severity="secondary"
         size="small"
@@ -159,6 +167,20 @@ function handleRestart() {
     }
   } catch (e) {
     console.error('重启失败:', e)
+    alert('重启失败: ' + (e?.message || '未知错误'))
+  }
+}
+function handleRestartService() {
+  
+  try {
+    const result = JSON.parse(window.AndroidBridge.restartService())
+    if (result.code === 0) {
+      alert('重启服务命令已执行，服务即将重启')
+    } else {
+      alert(result.msg || '重启服务失败')
+    }
+  } catch (e) {
+    console.error('重启服务失败:', e)
     alert('重启失败: ' + (e?.message || '未知错误'))
   }
 }

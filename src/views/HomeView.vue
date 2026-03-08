@@ -48,12 +48,14 @@
                 :class="{ 'bg-indigo-500/15': selectedIds.has(script.id) }"
                 @click="toggleScript(script)"
               >
-                <Checkbox
-                  :model-value="selectedIds.has(script.id)"
-                  :binary="true"
-                  :input-id="`script-${script.id}`"
-                  @update:model-value="() => toggleScript(script)"
-                />
+                <span @click.stop>
+                  <Checkbox
+                    :model-value="selectedIds.has(script.id)"
+                    :binary="true"
+                    :input-id="`script-${script.id}`"
+                    @update:model-value="() => toggleScript(script)"
+                  />
+                </span>
                 <img
                   v-if="script.icon_url"
                   :src="script.icon_url"
@@ -190,6 +192,13 @@ function handleExecute() {
   const time = Number(executeTime.value) || 0
   const rounds = Number(executeRounds.value) || 0
   console.log('执行', { executeTime: time, executeRounds: rounds, scripts: selectedScripts.value })
+  const scriptIds = selectedScripts.value.map(s => s.id)
+  const res = await clientAddTask(scriptIds, time, rounds)
+  if (res.code === 0) {
+    alert('执行成功')
+  } else {
+    alert(res.msg || '执行失败')
+  }
 }
 
 function toggleScript(script) {

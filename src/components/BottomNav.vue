@@ -8,14 +8,14 @@
       <span class="nav-icon">🏠</span>
       <span class="nav-label">首页</span>
     </router-link>
-    <router-link
+    <!-- <router-link
       to="/backup"
       class="nav-item"
       :class="{ active: $route.path === '/backup' }"
     >
       <span class="nav-icon">📦</span>
       <span class="nav-label">备份</span>
-    </router-link>
+    </router-link> -->
     <router-link
       v-if="userStore.isAdmin"
       to="/admin"
@@ -23,7 +23,7 @@
       :class="{ active: $route.path === '/admin' }"
     >
       <span class="nav-icon">⚙️</span>
-      <span class="nav-label">管理</span>
+      <span class="nav-label">管理</span> 
     </router-link>
     <router-link
       to="/profile"

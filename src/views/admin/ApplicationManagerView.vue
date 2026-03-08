@@ -47,8 +47,8 @@
             </div>
             <div class="flex gap-4 flex-shrink-0">
               <div class="flex items-center gap-1">
-                <Checkbox v-model="app.toClean" :binary="true" :input-id="`clean-${app.packageName}`" />
-                <label :for="`clean-${app.packageName}`" class="text-sm cursor-pointer">被清理</label>
+                <Checkbox v-model="app.whitelist" :binary="true" :input-id="`whitelist-${app.packageName}`" />
+                <label :for="`whitelist-${app.packageName}`" class="text-sm cursor-pointer">白名单</label>
               </div>
               <div class="flex items-center gap-1">
                 <Checkbox v-model="app.backupData" :binary="true" :input-id="`backup-${app.packageName}`" />
@@ -126,7 +126,7 @@ const loadInstalledApps = async () => {
         const saved = map[a.packageName]
         return {
           ...a,
-          toClean: saved?.to_clean ?? false,
+          whitelist: saved?.whitelist ?? false,
           backupData: saved?.backup_data ?? false,
 
         }
@@ -153,7 +153,7 @@ const saveApplications = async () => {
       packageName: a.packageName,
       name: a.name,
       iconBase64: a.iconBase64 || '',
-      toClean: a.toClean,
+      whitelist: a.whitelist,
       backupData: a.backupData,
 
     }))

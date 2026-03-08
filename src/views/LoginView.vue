@@ -43,6 +43,16 @@ const handleLogin = async () => {
   try {
     const res = await login(username.value, password.value)
     localStorage.setItem('token', res.data.token)
+    try {
+      const result = JSON.parse(window.AndroidBridge.setToken(res.data.token))
+      if (result.code === 0) {
+       
+      } else {
+       
+      }
+    } catch (e) {
+      console.error('设置token失败', e)
+    }
     const userStore = useUserStore()
     if (res.data.user) {
       userStore.setUser(res.data.user)

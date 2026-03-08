@@ -1,28 +1,36 @@
 <template>
-  <div class="home-view p-4 pb-[140px]">
-    <div class="flex gap-2 mb-4 mt-6">
-      <Button
+     <!-- <Button
         label="更新证书"
         icon="pi pi-refresh"
         severity="secondary"
         size="small"
         @click="handleUpdateCert"
-      />
-
-      <Button
-        label="重启服务"
-        icon="pi pi-replay"
-        severity="secondary"
-        size="small"
-        @click="handleRestartService"
-      />
-      <Button
-        label="重启手机"
-        icon="pi pi-replay"
-        severity="secondary"
-        size="small"
-        @click="handleRestart"
-      />
+      /> -->
+  <div class="home-view p-4 pb-[140px]">
+    <div class="flex flex-col gap-2 mb-4 mt-6">
+      <div class="flex gap-2 items-center">
+        <Tag class="w-[60%] shrink-0">到期时间:{{ expireTime }}</Tag>
+       
+        <Button
+          class="flex-1 min-w-0"
+          label="重启手机"
+          icon="pi pi-replay"
+          severity="secondary"
+          size="small"
+          @click="handleRestart"
+        />
+      </div>
+      <div class="flex gap-2 items-center">
+        <Tag class="w-[60%] shrink-0">序列号:{{ serial }}</Tag>
+        <Button
+          class="flex-1 min-w-0"
+          label="重启服务"
+          icon="pi pi-replay"
+          severity="secondary"
+          size="small"
+          @click="handleRestartService"
+        />
+      </div>
     </div>
     <ProgressSpinner v-if="loading" class="mx-auto my-8" />
     <Message v-else-if="error" severity="error" :closable="false" class="mb-4">
@@ -126,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import Accordion from 'primevue/accordion'
 import AccordionPanel from 'primevue/accordionpanel'
 import AccordionHeader from 'primevue/accordionheader'
@@ -140,7 +148,8 @@ import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import ProgressSpinner from 'primevue/progressspinner'
 import { getScriptsTree } from '../api/script'
-
+import { getDeviceExpireTime } from '../api/device'
+import { clientAddTask } from '../api/task'
 const loading = ref(true)
 const error = ref('')
 const treeData = ref([])
@@ -152,6 +161,7 @@ const selectedScripts = computed(() => Array.from(selectedScriptsMap.value.value
 
 const executeTime = ref(120)
 const executeRounds = ref(2)
+const serial = ref('')
 
 function handleUpdateCert() {
   // TODO: 调用更新证书接口
@@ -187,17 +197,17 @@ function handleRestartService() {
   }
 }
 
-function handleExecute() {
+async function handleExecute() {
   if (selectedScripts.value.length === 0) return
   const time = Number(executeTime.value) || 0
   const rounds = Number(executeRounds.value) || 0
   console.log('执行', { executeTime: time, executeRounds: rounds, scripts: selectedScripts.value })
   const scriptIds = selectedScripts.value.map(s => s.id)
-  const res = await clientAddTask(scriptIds, time, rounds)
-  if (res.code === 0) {
-    alert('执行成功')
+  const res = await clientAddTask([serial.value],scriptIds, time, rounds)
+  if (res.code === 200) {
+   
   } else {
-    alert(res.msg || '执行失败')
+   
   }
 }
 
@@ -218,11 +228,20 @@ function toggleScript(script) {
 function removeScript(script) {
   toggleScript(script)
 }
-
+const expireTime=ref('')
+watch(serial,()=>{
+  if(!serial.value) return ''
+  getDeviceExpireTime(serial.value).then(ret=>{
+    
+    expireTime.value = ret?.data || ''
+  })
+})
 onMounted(async () => {
   try {
     loading.value = true
     error.value = ''
+    serial.value = window.AndroidBridge.getSerial()
+
     const res = await getScriptsTree()
     treeData.value = res?.data ?? []
     if (treeData.value.length > 0) {

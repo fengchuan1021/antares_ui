@@ -38,7 +38,7 @@
     </Message>
 
     <template v-else>
-      <div class="scripts-tree grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-1 min-h-[320px]">
+      <div class="scripts-tree grid grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)] gap-1 min-h-[320px]">
         <!-- 左侧：分类列表 -->
         <div class="flex flex-col min-h-0 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
       
@@ -52,7 +52,7 @@
           >
             <template #option="{ option }">
               <span class="flex items-center gap-2 w-full">
-                <i class="pi pi-folder text-gray-500 dark:text-gray-400 shrink-0" />
+            
                 <span class="flex-1 truncate font-medium">{{ option.name }}</span>
                 <Tag v-if="option.is_new" value="新" severity="success" class="text-xs shrink-0" />
                 <Tag v-if="option.is_hot" value="热" severity="danger" class="text-xs shrink-0" />
@@ -71,7 +71,7 @@
                 <div
                   v-for="script in currentCategory.scripts"
                   :key="script.id"
-                  class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  class="flex items-center gap-1 p-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
                   :class="{ 'bg-indigo-500/15': selectedIds.has(script.id) }"
                   @click="toggleScript(script)"
                 >

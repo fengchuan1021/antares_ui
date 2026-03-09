@@ -38,51 +38,74 @@
     </Message>
 
     <template v-else>
-      <Accordion v-model:value="expandedCategories" multiple class="scripts-tree">
-        <AccordionPanel v-for="category in treeData" :key="category.id" :value="category.id">
-          <AccordionHeader>
-            <span class="flex items-center gap-2 w-full">
-              <span class="flex-1 font-medium">{{ category.name }}</span>
-              <Tag v-if="category.is_new" value="新" severity="success" class="text-xs" />
-              <Tag v-if="category.is_hot" value="热" severity="danger" class="text-xs" />
-            </span>
-          </AccordionHeader>
-          <AccordionContent>
-            <div class="flex flex-col gap-1 py-1">
-              <div
-                v-for="script in category.scripts"
-                :key="script.id"
-                class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-                :class="{ 'bg-indigo-500/15': selectedIds.has(script.id) }"
-                @click="toggleScript(script)"
-              >
-                <span @click.stop>
-                  <Checkbox
-                    :model-value="selectedIds.has(script.id)"
-                    :binary="true"
-                    :input-id="`script-${script.id}`"
-                    @update:model-value="() => toggleScript(script)"
+      <div class="scripts-tree grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-1 min-h-[320px]">
+        <!-- 左侧：分类列表 -->
+        <div class="flex flex-col min-h-0 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+      
+          <Listbox
+            v-model="activeCategoryId"
+            :options="treeData"
+            option-label="name"
+            option-value="id"
+            class="flex-1 min-h-0 border-0 rounded-none [&_.p-listbox-list]:max-h-full [&_.p-listbox-list]:overflow-auto"
+            list-class="py-1"
+          >
+            <template #option="{ option }">
+              <span class="flex items-center gap-2 w-full">
+                <i class="pi pi-folder text-gray-500 dark:text-gray-400 shrink-0" />
+                <span class="flex-1 truncate font-medium">{{ option.name }}</span>
+                <Tag v-if="option.is_new" value="新" severity="success" class="text-xs shrink-0" />
+                <Tag v-if="option.is_hot" value="热" severity="danger" class="text-xs shrink-0" />
+              </span>
+            </template>
+          </Listbox>
+        </div>
+        <!-- 右侧：当前分类的脚本列表 -->
+        <div class="flex flex-col min-h-0 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <!-- <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-sm font-medium text-gray-600 dark:text-gray-400">
+            {{ currentCategory?.name ?? '请选择分类' }}
+          </div> -->
+          <div class="flex-1 overflow-auto">
+            <template v-if="currentCategory?.scripts?.length">
+              <div class="flex flex-col gap-1">
+                <div
+                  v-for="script in currentCategory.scripts"
+                  :key="script.id"
+                  class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  :class="{ 'bg-indigo-500/15': selectedIds.has(script.id) }"
+                  @click="toggleScript(script)"
+                >
+                  <span @click.stop>
+                    <Checkbox
+                      :model-value="selectedIds.has(script.id)"
+                      :binary="true"
+                      :input-id="`script-${script.id}`"
+                      @update:model-value="() => toggleScript(script)"
+                    />
+                  </span>
+                  <img
+                    v-if="script.icon_url"
+                    :src="script.icon_url"
+                    :alt="script.name"
+                    class="w-6 h-6 rounded-lg object-cover flex-shrink-0"
                   />
-                </span>
-                <img
-                  v-if="script.icon_url"
-                  :src="script.icon_url"
-                  :alt="script.name"
-                  class="w-9 h-9 rounded-lg object-cover flex-shrink-0"
-                />
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium truncate">{{ script.name }}</div>
-                  <div v-if="script.description" class="text-sm text-gray-500 truncate">
-                    {{ script.description }}
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium truncate">{{ script.name }}</div>
+                    <div v-if="script.description" class="text-sm text-gray-500 truncate">
+                      {{ script.description }}
+                    </div>
                   </div>
                 </div>
               </div>
+            </template>
+            <div v-else class="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 text-sm">
+              暂无脚本
             </div>
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
+          </div>
+        </div>
+      </div>
 
-      <Card v-if="selectedScripts.length > 0" class="mt-4 selected-summary">
+      <!-- <Card v-if="selectedScripts.length > 0" class="mt-4 selected-summary">
         <template #title>已选 {{ selectedScripts.length }} 个脚本</template>
         <template #content>
           <div class="flex flex-wrap gap-2">
@@ -95,7 +118,7 @@
             />
           </div>
         </template>
-      </Card>
+      </Card> -->
     </template>
 
     <div class="execute-bar fixed bottom-14 left-0 right-0 flex items-end gap-2 p-2 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
@@ -135,10 +158,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import Accordion from 'primevue/accordion'
-import AccordionPanel from 'primevue/accordionpanel'
-import AccordionHeader from 'primevue/accordionheader'
-import AccordionContent from 'primevue/accordioncontent'
+import Listbox from 'primevue/listbox'
 import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -153,8 +173,12 @@ import { clientAddTask } from '../api/task'
 const loading = ref(true)
 const error = ref('')
 const treeData = ref([])
-const expandedCategories = ref([])
+const activeCategoryId = ref(null)
 const selectedIds = ref(new Set())
+
+const currentCategory = computed(() =>
+  treeData.value.find(c => c.id === activeCategoryId.value) ?? null
+)
 const selectedScriptsMap = ref(new Map())
 
 const selectedScripts = computed(() => Array.from(selectedScriptsMap.value.values()))
@@ -244,8 +268,8 @@ onMounted(async () => {
 
     const res = await getScriptsTree()
     treeData.value = res?.data ?? []
-    if (treeData.value.length > 0) {
-      expandedCategories.value = [treeData.value[0].id]
+    if (treeData.value.length > 0 && !activeCategoryId.value) {
+      activeCategoryId.value = treeData.value[0].id
     }
   } catch (e) {
     error.value = e?.response?.data?.error || e?.message || '加载失败'

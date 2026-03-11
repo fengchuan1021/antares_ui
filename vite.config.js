@@ -11,10 +11,15 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      '/api': {
+      '/ws':{
         target: 'http://192.168.1.234:8080',
         changeOrigin: true,
         ws: true,
+      },
+      '/api': {
+        target: 'http://192.168.1.234:8080',
+        changeOrigin: true,
+        
       },
       '/images': {
         target: 'http://192.168.1.234:8080',

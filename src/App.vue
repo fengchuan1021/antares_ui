@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import BottomNav from './components/BottomNav.vue'
+import Toast from 'primevue/toast'
 
 const route = useRoute()
 const showBottomNav = computed(() => !['/login', '/register'].includes(route.path))
@@ -46,6 +47,7 @@ onMounted(async () => {
 
 <template>
   <div class="app-layout">
+    <Toast />
     <main class="main-content" :class="{ 'no-nav-padding': !showBottomNav }">
       <router-view />
     </main>

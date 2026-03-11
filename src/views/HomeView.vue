@@ -40,7 +40,7 @@
     <template v-else>
       <div class="scripts-tree grid grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)] gap-1 min-h-[320px]">
         <!-- 左侧：分类列表 -->
-        <div class="flex flex-col min-h-0 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div class="flex flex-col min-h-0 border rounded-lg overflow-hidden panel">
       
           <Listbox
             v-model="activeCategoryId"
@@ -61,7 +61,7 @@
           </Listbox>
         </div>
         <!-- 右侧：当前分类的脚本列表 -->
-        <div class="flex flex-col min-h-0 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div class="flex flex-col min-h-0 border rounded-lg overflow-hidden panel">
           <!-- <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-sm font-medium text-gray-600 dark:text-gray-400">
             {{ currentCategory?.name ?? '请选择分类' }}
           </div> -->
@@ -71,7 +71,7 @@
                 <div
                   v-for="script in currentCategory.scripts"
                   :key="script.id"
-                  class="flex items-center gap-1 p-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  class="flex items-center gap-1 p-2 rounded-lg cursor-pointer transition-colors hover:bg-[#ffeec4]"
                   :class="{ 'bg-indigo-500/15': selectedIds.has(script.id) }"
                   @click="toggleScript(script)"
                 >
@@ -279,6 +279,34 @@ onMounted(async () => {
 })
 </script>
 <style scoped>
+.home-view {
+  color: #3b2b10;
+}
+
+.panel {
+  background: rgba(255, 249, 230, 0.95);
+  border-color: #f4c769;
+}
+
+.scripts-tree :deep(.p-listbox-list) {
+  background: transparent;
+}
+
+.scripts-tree :deep(.p-listbox-item.p-highlight) {
+  background: rgba(244, 199, 105, 0.3);
+  color: #3b2b10;
+}
+
+.scripts-tree :deep(.p-listbox-item) {
+  color: #3b2b10;
+}
+
+.execute-bar {
+  background: rgba(255, 249, 230, 0.96);
+  border-top: 1px solid #f4c769;
+  backdrop-filter: blur(8px);
+}
+
 .execute-bar :deep(.p-inputnumber) {
   min-width: 0;
   max-width: 100%;

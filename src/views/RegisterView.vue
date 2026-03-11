@@ -1,6 +1,9 @@
 <template>
   <div class="auth-view">
-    <h1>注册</h1>
+    <div class="login-header">
+      <img src="/public/logo.jpg" alt="Logo" class="login-logo" />
+      <h1 style="color: #e09d36;">赏金猎人</h1>
+    </div>
     <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
     <form class="auth-form" @submit.prevent="handleRegister">
       <input
@@ -37,8 +40,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { register } from '../api/user'
+import { useToast } from 'primevue/usetoast'
 
 const router = useRouter()
+const toast = useToast()
 
 const username = ref('')
 const password = ref('')
@@ -56,12 +62,22 @@ const handleRegister = async () => {
 
   loading.value = true
   try {
-    // 这里预留真实注册接口调用位置
-    // await register(username.value, password.value)
-    // 注册成功后直接跳回登录页
-    router.push('/login')
+    const res = await register(username.value, password.value)
+    const code = res?.data?.code ?? res?.code
+    const msg = res?.data?.msg ?? res?.msg ?? ''
+    if (code === 200) {
+      toast.add({
+        severity: 'success',
+        summary: '注册成功',
+        detail: '注册成功请登录',
+        life: 3000
+      })
+      router.push({ path: '/login', query: { username: username.value } })
+    } else {
+      errorMsg.value = msg || '注册失败'
+    }
   } catch (error) {
-    errorMsg.value = error?.response?.data?.error || error?.message || '注册失败'
+    errorMsg.value = error?.response?.data?.msg || error?.response?.data?.error || error?.message || '注册失败'
   } finally {
     loading.value = false
   }
@@ -73,6 +89,19 @@ const goLogin = () => {
 </script>
 
 <style scoped>
+
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.login-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+}
 .auth-view {
   display: flex;
   flex-direction: column;

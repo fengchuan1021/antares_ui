@@ -47,8 +47,8 @@ const router = createRouter({
 
 // 路由守卫：启动时校验 token 和用户信息
 router.beforeEach(async (to) => {
-  // 登录页无需校验
-  if (to.path === '/login') {
+  // 登录/注册页无需校验
+  if (to.path === '/login' || to.path === '/register') {
     return true
   }
 

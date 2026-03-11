@@ -1,7 +1,7 @@
 <template>
   <div class="auth-view">
     <div class="login-header">
-      <img src="/public/logo.jpg" alt="Logo" class="login-logo" />
+      <img src="/logo.jpg" alt="Logo" class="login-logo" />
       <h1 style="color: #e09d36;">赏金猎人</h1>
     </div>
     <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>

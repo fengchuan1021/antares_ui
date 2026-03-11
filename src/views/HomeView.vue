@@ -147,10 +147,10 @@
         </div>
       </div>
       <Button
-        label="执行"
+        :label="executeCooldownRemaining > 0 ? `执行 (${executeCooldownRemaining}s)` : '执行'"
         icon="pi pi-play"
         class="executebtn"
-        :disabled="selectedScripts.length === 0"
+        :disabled="selectedScripts.length === 0 || executeCooldownRemaining > 0"
         @click="handleExecute"
       />
     </div>
@@ -158,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import Listbox from 'primevue/listbox'
 import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
@@ -190,6 +190,10 @@ const selectedScripts = computed(() => Array.from(selectedScriptsMap.value.value
 const executeTime = ref(120)
 const executeRounds = ref(2)
 const serial = ref('')
+const EXECUTE_COOLDOWN_SEC = 5
+const lastExecuteTime = ref(0)
+const executeCooldownRemaining = ref(0)
+let executeCooldownTimer = null
 
 function handleUpdateCert() {
   // TODO: 调用更新证书接口
@@ -227,6 +231,26 @@ function handleRestartService() {
 
 async function handleExecute() {
   if (selectedScripts.value.length === 0) return
+  const now = Date.now()
+  if (lastExecuteTime.value && now - lastExecuteTime.value < EXECUTE_COOLDOWN_SEC * 1000) {
+    toast.add({
+      severity: 'warn',
+      detail: `操作过于频繁，${EXECUTE_COOLDOWN_SEC} 秒内仅可执行一次`,
+      life: 2000
+    })
+    return
+  }
+  lastExecuteTime.value = now
+  executeCooldownRemaining.value = EXECUTE_COOLDOWN_SEC
+  if (executeCooldownTimer) clearInterval(executeCooldownTimer)
+  executeCooldownTimer = setInterval(() => {
+    executeCooldownRemaining.value = Math.max(0, executeCooldownRemaining.value - 1)
+    if (executeCooldownRemaining.value <= 0 && executeCooldownTimer) {
+      clearInterval(executeCooldownTimer)
+      executeCooldownTimer = null
+    }
+  }, 1000)
+
   const time = Number(executeTime.value) || 0
   const rounds = Number(executeRounds.value) || 0
   console.log('执行', { executeTime: time, executeRounds: rounds, scripts: selectedScripts.value })
@@ -289,6 +313,13 @@ onMounted(async () => {
     error.value = e?.response?.data?.error || e?.message || '加载失败'
   } finally {
     loading.value = false
+  }
+})
+
+onUnmounted(() => {
+  if (executeCooldownTimer) {
+    clearInterval(executeCooldownTimer)
+    executeCooldownTimer = null
   }
 })
 </script>

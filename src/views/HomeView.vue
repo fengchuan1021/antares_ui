@@ -71,8 +71,8 @@
                 <div
                   v-for="script in currentCategory.scripts"
                   :key="script.id"
-                  class="flex items-center gap-1 p-2 rounded-lg cursor-pointer transition-colors hover:bg-[#ffeec4]"
-                  :class="{ 'bg-indigo-500/15': selectedIds.has(script.id) }"
+                  class="flex items-center gap-1 p-2 rounded-lg cursor-pointer"
+                  
                   @click="toggleScript(script)"
                 >
                   <span @click.stop>
@@ -149,6 +149,7 @@
       <Button
         label="执行"
         icon="pi pi-play"
+        class="executebtn"
         :disabled="selectedScripts.length === 0"
         @click="handleExecute"
       />
@@ -264,7 +265,12 @@ onMounted(async () => {
   try {
     loading.value = true
     error.value = ''
-    serial.value = window.AndroidBridge.getSerial()
+    try{
+      serial.value = window.AndroidBridge.getSerial()
+    }catch(e){
+      serial.value=""
+    }
+    
 
     const res = await getScriptsTree()
     treeData.value = res?.data ?? []
@@ -288,16 +294,33 @@ onMounted(async () => {
   border-color: #f4c769;
 }
 
+.scripts-tree :deep(.p-listbox),
+.scripts-tree :deep(.p-listbox-list-wrapper),
 .scripts-tree :deep(.p-listbox-list) {
   background: transparent;
+  border: none;
 }
 
-.scripts-tree :deep(.p-listbox-item.p-highlight) {
-  background: rgba(244, 199, 105, 0.3);
-  color: #3b2b10;
+/* Checkbox 勾选为金色，方框背景保持白色（PrimeVue 4 选中态在根上为 .p-checkbox-checked） */
+.scripts-tree :deep(.p-checkbox.p-checkbox-checked .p-checkbox-box),
+.scripts-tree :deep(.p-checkbox.p-checkbox-checked .p-checkbox-box:hover),
+.scripts-tree :deep(.p-checkbox.p-checkbox-checked .p-checkbox-box.p-focus) {
+  border-color: #e0a300 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  box-shadow: none !important;
 }
 
-.scripts-tree :deep(.p-listbox-item) {
+.scripts-tree :deep(.p-checkbox.p-checkbox-checked .p-checkbox-box .p-checkbox-icon),
+.scripts-tree :deep(.p-checkbox .p-checkbox-box .p-checkbox-icon) {
+  color: #e0a300 !important;
+  fill: #e0a300 !important;
+}
+
+.scripts-tree :deep(.p-listbox-item),
+.scripts-tree :deep(.p-listbox-item.p-highlight),
+.scripts-tree :deep(.p-listbox-item.p-focus) {
+  background: transparent !important;
   color: #3b2b10;
 }
 
@@ -313,6 +336,17 @@ onMounted(async () => {
 }
 .execute-bar :deep(.p-inputnumber input) {
   min-width: 0;
+}
+.executebtn {
+
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f6b148, #e08b00);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+ 
 }
 </style>
 

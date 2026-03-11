@@ -56,4 +56,23 @@ button:focus-visible {
 .card {
   padding: 2em;
 }
+body{
+  color:#ffffff !important;
+}
+/* 首页脚本列表 Checkbox 选中：仅勾选为金色，不改变背景色 */
+.home-view .p-checkbox.p-checkbox-checked .p-checkbox-box,
+.home-view .p-checkbox.p-checkbox-checked .p-checkbox-box:hover,
+.home-view .p-checkbox.p-checkbox-checked .p-checkbox-box.p-focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: #e0a300 !important;
+  box-shadow: none !important;
+}
+.home-view .p-checkbox.p-checkbox-checked .p-checkbox-box .p-checkbox-icon {
+  color: #e0a300 !important;
+  fill: #e0a300 !important;
+}
 
+.p-listbox .p-listbox-list .p-listbox-option.p-listbox-option-selected{
+  background:#f4c7694f !important;
+}

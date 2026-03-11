@@ -48,13 +48,15 @@ const userStore = useUserStore()
   bottom: 0;
   left: 0;
   right: 0;
-  height: 56px;
-  background-color: #1a1a1a;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  height: 60px;
+  padding: 0 0.75rem;
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 100;
+  background: rgba(255, 249, 230, 0.96);
+  border-top: 1px solid #f4c769;
+  backdrop-filter: blur(8px);
 }
 
 .nav-item {
@@ -64,18 +66,19 @@ const userStore = useUserStore()
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  padding: 0.5rem;
+  padding: 0.35rem 0.5rem;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.6);
-  transition: color 0.2s;
+  color: #b86a00;
+  transition: color 0.2s, transform 0.15s ease-out;
 }
 
 .nav-item:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: #e08b00;
+  transform: translateY(-1px);
 }
 
 .nav-item.active {
-  color: #646cff;
+  color: #e08b00;
 }
 
 .nav-icon {
@@ -83,22 +86,6 @@ const userStore = useUserStore()
 }
 
 .nav-label {
-  font-size: 0.75rem;
-}
-
-@media (prefers-color-scheme: light) {
-  .bottom-nav {
-    background-color: #ffffff;
-    border-top-color: rgba(0, 0, 0, 0.1);
-  }
-  .nav-item {
-    color: rgba(0, 0, 0, 0.6);
-  }
-  .nav-item:hover {
-    color: rgba(0, 0, 0, 0.9);
-  }
-  .nav-item.active {
-    color: #535bf2;
-  }
+  font-size: 0.78rem;
 }
 </style>

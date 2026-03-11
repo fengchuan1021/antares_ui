@@ -19,17 +19,17 @@ onMounted(async () => {
     router.push('/login')
     return
   }else{
-    // try {
-    //   const result = JSON.parse(window.AndroidBridge.setToken(token))
-    // if (result.code === 0) {
+  //   try {
+  //     const result = JSON.parse(window.AndroidBridge.setToken(token))
+  //   if (result.code === 0) {
     
-    // } else {
+  //   } else {
      
-    // }
-  } catch (e) {
-    console.error('设置token失败', e)
+  //   }
+  // } catch (e) {
+  //   console.error('设置token失败', e)
     
-  }
+  // }
   }
   const userStore = useUserStore()
   userStore.loadUserFromStorage()

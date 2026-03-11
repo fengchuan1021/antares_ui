@@ -31,6 +31,12 @@ const routes = [
     name: 'login',
     component: () => import('../views/LoginView.vue'),
     meta: { title: '登录' }
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('../views/RegisterView.vue'),
+    meta: { title: '注册' }
   }
 ]
 

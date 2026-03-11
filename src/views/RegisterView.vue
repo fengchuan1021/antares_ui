@@ -1,8 +1,8 @@
 <template>
-  <div class="login-view">
-    <h1>登录</h1>
+  <div class="auth-view">
+    <h1>注册</h1>
     <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
-    <form class="login-form" @submit.prevent="handleLogin">
+    <form class="auth-form" @submit.prevent="handleRegister">
       <input
         v-model="username"
         type="text"
@@ -17,12 +17,19 @@
         class="input"
         required
       />
+      <input
+        v-model="confirmPassword"
+        type="password"
+        placeholder="确认密码"
+        class="input"
+        required
+      />
       <button type="submit" class="btn" :disabled="loading">
-        {{ loading ? '登录中...' : '登录' }}
+        {{ loading ? '注册中...' : '注册' }}
       </button>
     </form>
-    <button type="button" class="link-btn" @click="goRegister">
-      还没有账号？去注册
+    <button type="button" class="link-btn" @click="goLogin">
+      已有账号？去登录
     </button>
   </div>
 </template>
@@ -30,50 +37,43 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { login } from '../api/user'
-import { useUserStore } from '../stores/user'
 
 const router = useRouter()
+
 const username = ref('')
 const password = ref('')
+const confirmPassword = ref('')
+const errorMsg = ref('')
 const loading = ref(false)
 
-const errorMsg = ref('')
-
-const goRegister = () => {
-  router.push('/register')
-}
-const handleLogin = async () => {
+const handleRegister = async () => {
   errorMsg.value = ''
+
+  if (password.value !== confirmPassword.value) {
+    errorMsg.value = '两次输入的密码不一致'
+    return
+  }
+
   loading.value = true
   try {
-    const res = await login(username.value, password.value)
-    localStorage.setItem('token', res.data.token)
-    try {
-      const result = JSON.parse(window.AndroidBridge.setToken(res.data.token))
-      if (result.code === 0) {
-       
-      } else {
-       
-      }
-    } catch (e) {
-      console.error('设置token失败', e)
-    }
-    const userStore = useUserStore()
-    if (res.data.user) {
-      userStore.setUser(res.data.user)
-    }
-    router.push('/')
+    // 这里预留真实注册接口调用位置
+    // await register(username.value, password.value)
+    // 注册成功后直接跳回登录页
+    router.push('/login')
   } catch (error) {
-    errorMsg.value = error?.response?.data?.error || error?.message || '登录失败'
+    errorMsg.value = error?.response?.data?.error || error?.message || '注册失败'
   } finally {
     loading.value = false
   }
 }
+
+const goLogin = () => {
+  router.push('/login')
+}
 </script>
 
 <style scoped>
-.login-view {
+.auth-view {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -90,32 +90,33 @@ h1 {
   text-align: center;
 }
 
-.login-form {
+.auth-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
 }
 
 .input {
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: inherit;
+  background: rgba(255, 255, 255, 0.4);
+  color: #3b2b10;
   font-size: 1rem;
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .input:focus {
   outline: none;
-  border-color: #646cff;
+  border-color: #e08b00;
 }
 
 .error-msg {
-  color: #f87171;
+  color: #d32f2f;
   font-size: 0.875rem;
   margin: 0 0 1rem;
   text-align: center;
@@ -125,11 +126,12 @@ h1 {
   padding: 0.75rem 1rem;
   border: none;
   border-radius: 8px;
-  background: #646cff;
+  background: linear-gradient(135deg, #f6b148, #e08b00);
   color: white;
   font-size: 1rem;
   cursor: pointer;
   transition: opacity 0.2s;
+  width: 100%;
 }
 
 .btn:hover:not(:disabled) {
@@ -146,19 +148,11 @@ h1 {
   background: transparent;
   border: none;
   color: #b86a00;
+  padding: 0;
 }
 
 .link-btn:hover {
   opacity: 0.8;
 }
-
-@media (prefers-color-scheme: light) {
-  .input {
-    border-color: rgba(0, 0, 0, 0.2);
-    background: rgba(0, 0, 0, 0.02);
-  }
-  .input::placeholder {
-    color: rgba(0, 0, 0, 0.4);
-  }
-}
 </style>
+

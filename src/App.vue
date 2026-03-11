@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import BottomNav from './components/BottomNav.vue'
 
 const route = useRoute()
-const showBottomNav = computed(() => route.path !== '/login')
+const showBottomNav = computed(() => !['/login', '/register'].includes(route.path))
 
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'

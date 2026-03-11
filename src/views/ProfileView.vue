@@ -1,11 +1,20 @@
 <template>
   <div class="profile-view">
-    <h1>我的</h1>
-    <p>个人中心</p>
+    <button class="logout-btn" @click="handleLogout">退出登录</button>
   </div>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
+
+const router = useRouter()
+const userStore = useUserStore()
+
+function handleLogout() {
+  userStore.logout()
+  router.push('/login')
+}
 </script>
 
 <style scoped>
@@ -19,5 +28,22 @@ h1 {
 p {
   margin: 0;
   color: rgba(255, 255, 255, 0.6);
+}
+.logout-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: #fff;
+  background: rgba(239, 68, 68, 0.9);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.logout-btn:hover {
+  background: rgba(220, 38, 38, 1);
+}
+.logout-btn:active {
+  opacity: 0.9;
 }
 </style>

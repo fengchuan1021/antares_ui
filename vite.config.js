@@ -14,6 +14,7 @@ export default defineConfig({
       '/api': {
         target: 'http://192.168.1.234:8080',
         changeOrigin: true,
+        ws: true,
       },
       '/images': {
         target: 'http://192.168.1.234:8080',

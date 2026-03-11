@@ -47,7 +47,7 @@ onMounted(async () => {
 
 <template>
   <div class="app-layout">
-    <Toast />
+    <Toast position="bottom-center" />
     <main class="main-content" :class="{ 'no-nav-padding': !showBottomNav }">
       <router-view />
     </main>

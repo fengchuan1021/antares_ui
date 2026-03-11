@@ -77,3 +77,20 @@ body{
   background:linear-gradient(135deg, #f6b148, #e08b00) !important;
   color:white !important;
 }
+.p-button:not(:disabled):hover {
+  background: #e0a300 !important;
+  border: 1px solid #e0a300 !important;
+  color: white !important;
+}
+
+/* Toast 显示在底部并限制宽度 */
+.p-toast.p-toast-bottom-center {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 5rem;
+  max-width: min(22rem, 92vw);
+  width: auto;
+}
+.p-toast.p-toast-bottom-center .p-toast-message {
+  max-width: 100%;
+}

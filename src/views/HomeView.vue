@@ -124,7 +124,7 @@
     <div class="execute-bar fixed bottom-14 left-0 right-0 flex items-end gap-2 p-2 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
       <div class="flex-1 grid grid-cols-2 gap-2 min-w-0">
         <div class="min-w-0 flex flex-col gap-2 overflow-hidden">
-          <label class="text-sm text-gray-600 dark:text-gray-400">执行时间</label>
+          <label class="text-sm text-gray-600 dark:text-gray-400">执行分钟</label>
           <InputNumber
             v-model="executeTime"
             :min="1"
@@ -168,9 +168,12 @@ import Tag from 'primevue/tag'
 import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import ProgressSpinner from 'primevue/progressspinner'
+import { useToast } from 'primevue/usetoast'
 import { getScriptsTree } from '../api/script'
 import { getDeviceExpireTime } from '../api/device'
 import { clientAddTask } from '../api/task'
+
+const toast = useToast()
 const loading = ref(true)
 const error = ref('')
 const treeData = ref([])
@@ -232,7 +235,12 @@ async function handleExecute() {
   if (res.code === 200) {
    
   } else {
-   
+   toast.add({
+    severity: 'error',
+
+    detail: res.msg,
+    life: 3000
+   })
   }
 }
 

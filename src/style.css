@@ -74,5 +74,6 @@ body{
 }
 
 .p-listbox .p-listbox-list .p-listbox-option.p-listbox-option-selected{
-  background:#f4c7694f !important;
+  background:linear-gradient(135deg, #f6b148, #e08b00) !important;
+  color:white !important;
 }

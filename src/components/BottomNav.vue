@@ -5,7 +5,7 @@
       class="nav-item"
       :class="{ active: $route.path === '/' }"
     >
-      <span class="nav-icon">🏠</span>
+
       <span class="nav-label">首页</span>
     </router-link>
     <!-- <router-link
@@ -22,7 +22,7 @@
       class="nav-item"
       :class="{ active: $route.path === '/admin' }"
     >
-      <span class="nav-icon">⚙️</span>
+ 
       <span class="nav-label">管理</span> 
     </router-link>
     <router-link
@@ -30,7 +30,7 @@
       class="nav-item"
       :class="{ active: $route.path === '/profile' }"
     >
-      <span class="nav-icon">👤</span>
+     
       <span class="nav-label">我的</span>
     </router-link>
   </nav>

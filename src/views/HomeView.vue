@@ -9,10 +9,11 @@
   <div class="home-view p-4 pb-[140px]">
     <div class="flex flex-col gap-2 mb-4 mt-6">
       <div class="flex gap-2 items-center">
-        <Tag class="w-[60%] shrink-0">到期时间:{{ expireTime }}</Tag>
+        <Button :disabled="true" size="small" class="w-[60%] executebtn" >到期时间:{{ expireTime }}</Button>
        
         <Button
-          class="flex-1 min-w-0"
+        
+          class="flex-1 min-w-0 executebtn"
           label="重启手机"
           icon="pi pi-replay"
           severity="secondary"
@@ -21,9 +22,9 @@
         />
       </div>
       <div class="flex gap-2 items-center">
-        <Tag class="w-[60%] shrink-0">序列号:{{ serial }}</Tag>
+        <Button :disabled="true" size="small" class="w-[60%] executebtn" >序列号:{{ serial }}</Button>
         <Button
-          class="flex-1 min-w-0"
+          class="flex-1 min-w-0 executebtn"
           label="重启服务"
           icon="pi pi-replay"
           severity="secondary"
@@ -54,8 +55,7 @@
               <span class="flex items-center gap-2 w-full">
             
                 <span class="flex-1 truncate font-medium">{{ option.name }}</span>
-                <Tag v-if="option.is_new" value="新" severity="success" class="text-xs shrink-0" />
-                <Tag v-if="option.is_hot" value="热" severity="danger" class="text-xs shrink-0" />
+          
               </span>
             </template>
           </Listbox>

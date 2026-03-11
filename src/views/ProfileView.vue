@@ -1,5 +1,5 @@
 <template>
-  <div class="profile-view">
+  <div class="profile-view p-4 mt-6 ">
     <button class="logout-btn" @click="handleLogout">退出登录</button>
   </div>
 </template>

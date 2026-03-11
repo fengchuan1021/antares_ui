@@ -1,7 +1,7 @@
 <template>
   <div class="admin-view">
     <div v-if="currentMenu === null" class="menu-list p-4 mt-6">
-      <h1 class="text-xl font-semibold mb-4 ">管理</h1>
+      <h1 class="text-xl font-semibold mb-4 "></h1>
       <div class="menu-grid">
         <div
           v-for="item in menuItems"
@@ -90,7 +90,7 @@ const currentComponent = computed(() => {
 }
 .menu-icon {
   font-size: 1.25rem;
-  color: var(--p-primary-color);
+  color: #ffffff;
 }
 .menu-label {
   flex: 1;
@@ -124,7 +124,7 @@ const currentComponent = computed(() => {
 }
 @media (prefers-color-scheme: light) {
   .menu-item {
-    background: rgba(0, 0, 0, 0.04);
+    background:rgba(239, 68, 68, 0.9);
   }
   .menu-item:active {
     background: rgba(0, 0, 0, 0.08);

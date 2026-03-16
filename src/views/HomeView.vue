@@ -22,7 +22,7 @@
         />
       </div>
       <div class="flex gap-2 items-center">
-        <Button :disabled="true" size="small" class="w-[60%] executebtn" >序列号:{{ serial }}</Button>
+        <Button :disabled="true" size="small" class="w-[60%] executebtn" >{{ serial }}</Button>
         <Button
           class="flex-1 min-w-0 executebtn"
           label="重启服务"
@@ -147,11 +147,18 @@
         </div>
       </div>
       <Button
-        :label="executeCooldownRemaining > 0 ? `执行 (${executeCooldownRemaining}s)` : '执行'"
+        :label="executeCooldownRemaining > 0 ? ` (${executeCooldownRemaining}s)` : ''"
         icon="pi pi-play"
         class="executebtn"
         :disabled="selectedScripts.length === 0 || executeCooldownRemaining > 0"
         @click="handleExecute"
+      />
+      <Button
+      
+        icon="pi pi-times"
+        class="executebtn"
+        
+        @click="handleStop"
       />
     </div>
   </div>
@@ -171,7 +178,7 @@ import ProgressSpinner from 'primevue/progressspinner'
 import { useToast } from 'primevue/usetoast'
 import { getScriptsTree } from '../api/script'
 import { getDeviceExpireTime } from '../api/device'
-import { clientAddTask } from '../api/task'
+import { clientAddTask,clientStopTask } from '../api/task'
 
 const toast = useToast()
 const loading = ref(true)
@@ -256,6 +263,32 @@ async function handleExecute() {
   console.log('执行', { executeTime: time, executeRounds: rounds, scripts: selectedScripts.value })
   const scriptIds = selectedScripts.value.map(s => s.id)
   const res = await clientAddTask([serial.value],scriptIds, time, rounds)
+  if (res.code === 200) {
+   
+  } else {
+   toast.add({
+    severity: 'error',
+
+    detail: res.msg,
+    life: 3000
+   })
+  }
+}
+const lastStopTime=ref(0)
+async function handleStop() {
+  
+  const now = Date.now()
+  if (lastStopTime.value && now - lastStopTime.value < EXECUTE_COOLDOWN_SEC * 1000) {
+    toast.add({
+      severity: 'warn',
+      detail: `操作过于频繁，${EXECUTE_COOLDOWN_SEC} 秒内仅可执行一次`,
+      life: 2000
+    })
+    return
+  }
+  lastStopTime.value = now
+ 
+  const res = await clientStopTask([serial.value])
   if (res.code === 200) {
    
   } else {

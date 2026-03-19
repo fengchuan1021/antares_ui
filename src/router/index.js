@@ -27,6 +27,12 @@ const routes = [
     meta: { title: '管理' }
   },
   {
+    path: '/agent',
+    name: 'agent',
+    component: () => import('../views/AgentView.vue'),
+    meta: { title: '管理' }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../views/LoginView.vue'),

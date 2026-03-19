@@ -10,7 +10,7 @@
           @click="currentMenu = item.id"
         >
           <i :class="['pi', item.icon, 'menu-icon']"></i>
-          <span class="menu-label">{{ item.label }}</span>
+          <span class="menu-label" >{{ item.label }}</span>
           <i class="pi pi-chevron-right menu-arrow"></i>
         </div>
       </div>
@@ -23,7 +23,7 @@
           rounded
           @click="currentMenu = null"
         />
-        <span class="menu-title">{{ currentMenuLabel }}</span>
+        <span class="menu-title" style="color:rgba(239, 68, 68, 0.9)">{{ currentMenuLabel }}</span>
       </div>
       <div class="menu-body">
         <component :is="currentComponent" />
@@ -47,10 +47,10 @@ const menuItems = [
   { id: 'app', label: 'app管理', icon: 'pi-mobile', component: ApplicationManagerView },
   //{ id: 'scriptCategory', label: '脚本分类', icon: 'pi-folder', component: ScriptCategoryManagerView },
   // { id: 'script', label: '脚本管理', icon: 'pi-code', component: ScriptManagerView },
-  { id: 'user', label: '添加用户', icon: 'pi-user-plus', component: AddUserView },
+  // { id: 'user', label: '添加用户', icon: 'pi-user-plus', component: AddUserView },
   { id: 'device', label: '设备激活续费', icon: 'pi-tablet', component: DeviceActivationView },
-  { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },
-  { id: 'customer', label: '客户管理', icon: 'pi-users', component: CustomerManagementView }
+  // { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },
+  // { id: 'customer', label: '客户管理', icon: 'pi-users', component: CustomerManagementView }
 ]
 
 const currentMenu = ref(null)

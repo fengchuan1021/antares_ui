@@ -22,7 +22,7 @@
         />
       </div>
       <div class="flex gap-2 items-center">
-        <Button :disabled="true" size="small" class="w-[60%] executebtn" >{{ serial }}</Button>
+        <Tag :disabled="true" size="small" class="w-[60%] executebtn p-4" >{{ serial }}</Tag>
         <Button
           class="flex-1 min-w-0 executebtn"
           label="重启服务"
@@ -418,6 +418,7 @@ onUnmounted(() => {
   font-size: 1rem;
   cursor: pointer;
   transition: opacity 0.2s;
+  padding: 0.5rem;
  
 }
 </style>

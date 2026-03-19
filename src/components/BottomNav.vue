@@ -26,6 +26,15 @@
       <span class="nav-label">管理</span> 
     </router-link>
     <router-link
+      v-if="userStore.isAgent"
+      to="/agent"
+      class="nav-item"
+      :class="{ active: $route.path === '/agent' }"
+    >
+ 
+      <span class="nav-label">管理</span> 
+    </router-link>
+    <router-link
       to="/profile"
       class="nav-item"
       :class="{ active: $route.path === '/profile' }"

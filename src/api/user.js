@@ -13,3 +13,6 @@ export function getUserProfile() {
 export function createUser(username, password) {
   return request.post('/api/user', { username, password })
 }
+export function activateUser(username) {
+  return request.post('/api/user/activate', { username })
+}

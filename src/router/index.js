@@ -78,6 +78,15 @@ router.beforeEach(async (to) => {
     } catch {
       return '/'
     }
+  } else if (to.path === '/agent') {
+    try {
+      const user = JSON.parse((localStorage?.getItem?.('user')) || '{}')
+      if (user.role_id !== 2) {
+        return '/'
+      }
+    } catch {
+      return '/'
+    }
   }
 
   return true

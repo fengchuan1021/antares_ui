@@ -51,6 +51,7 @@
     { id: 'device', label: '设备激活续费', icon: 'pi-tablet', component: DeviceActivationView },
     // { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },
     // { id: 'customer', label: '客户管理', icon: 'pi-users', component: CustomerManagementView }
+   
   ]
   
   const currentMenu = ref(null)

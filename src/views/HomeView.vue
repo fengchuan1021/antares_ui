@@ -198,7 +198,7 @@ const selectedScriptsMap = ref(new Map())
 const selectedScripts = computed(() => Array.from(selectedScriptsMap.value.values()))
 
 const executeTime = ref(120)
-const executeRounds = ref(2)
+const executeRounds = ref(1)
 const serial = ref('')
 const EXECUTE_COOLDOWN_SEC = 5
 const lastExecuteTime = ref(0)

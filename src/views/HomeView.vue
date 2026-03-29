@@ -149,7 +149,17 @@
        />
      </div>
    </div>
-   <Button
+   <div  class=" flex  flex-col gap-1 overflow-hidden">
+
+   <div>
+     <Button
+   class="executebtn"
+   icon="pi pi-th-large"
+   @click="mutiExecute"
+ />
+   </div>
+   <div  class=" flex  gap-1 overflow-hidden">
+     <Button
      :label="executeCooldownRemaining > 0 ? ` (${executeCooldownRemaining}s)` : ''"
      icon="pi pi-play"
      class="executebtn"
@@ -163,7 +173,16 @@
      
      @click="handleStop"
    />
+   </div>
+   
  </div>
+ </div>
+
+ <MutiExecute
+   v-if="mutiExecuteVisible"
+   v-model:visible="mutiExecuteVisible"
+   @confirm="onMutiExecuteConfirm"
+ />
 </div>
 </template>
 
@@ -182,6 +201,7 @@ import { useToast } from 'primevue/usetoast'
 import { getScriptsTree } from '../api/script'
 import { getDeviceExpireTime } from '../api/device'
 import { clientAddTask,clientStopTask } from '../api/task'
+import MutiExecute from '../components/MutiExecute.vue'
 
 const toast = useToast()
 const loading = ref(true)
@@ -204,6 +224,23 @@ const EXECUTE_COOLDOWN_SEC = 5
 const lastExecuteTime = ref(0)
 const executeCooldownRemaining = ref(0)
 let executeCooldownTimer = null
+
+const mutiExecuteVisible = ref(false)
+/** 多设备执行时在对话框确认后的序列号列表；为空则使用当前机 serial */
+const taskSerials = ref([])
+
+function resolveTaskSerials() {
+if (taskSerials.value.length > 0) return taskSerials.value
+return serial.value ? [serial.value] : []
+}
+
+function mutiExecute() {
+mutiExecuteVisible.value = true
+}
+
+function onMutiExecuteConfirm(serials) {
+taskSerials.value = serials
+}
 
 function handleUpdateCert() {
 // TODO: 调用更新证书接口
@@ -279,7 +316,8 @@ const time = Number(executeTime.value) || 0
 const rounds = Number(executeRounds.value) || 0
 console.log('执行', { executeTime: time, executeRounds: rounds, scripts: selectedScripts.value })
 const scriptIds = selectedScripts.value.map(s => s.id)
-const res = await clientAddTask([serial.value],scriptIds, time, rounds)
+const serials = resolveTaskSerials()
+const res = await clientAddTask(serials, scriptIds, time, rounds)
 if (res.code === 200) {
 
 } else {
@@ -305,7 +343,7 @@ if (lastStopTime.value && now - lastStopTime.value < EXECUTE_COOLDOWN_SEC * 1000
 }
 lastStopTime.value = now
 
-const res = await clientStopTask([serial.value])
+const res = await clientStopTask(resolveTaskSerials())
 if (res.code === 200) {
 
 } else {

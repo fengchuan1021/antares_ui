@@ -8,7 +8,7 @@
       </div>
       <div class="profile-row">
         <span class="profile-label">App版本</span>
-        <span class="profile-value">{{ appVersion }}</span>
+        <span class="profile-value">current:{{ appVersion }} server:{{ serverAppVersion }} </span>
       </div>
     </div>
     <button type="button" class="logout-btn" @click="handleLogout">退出登录</button>
@@ -23,8 +23,8 @@ import { useUserStore } from '../stores/user'
 const router = useRouter()
 const userStore = useUserStore()
 const appVersion = ref('--')
-
-onMounted(() => {
+const serverAppVersion = ref('--')
+onMounted(async () => {
   try {
     if (typeof window === 'undefined' || !window.AndroidBridge || !window.AndroidBridge.getAppVersion) {
       return
@@ -35,6 +35,17 @@ onMounted(() => {
     }
   } catch (error) {
     console.error('getAppVersion failed', error)
+  }
+  try {
+    if (typeof window === 'undefined' || !window.AndroidBridge || !window.AndroidBridge.getServerAppVersion) {
+      return
+    }
+    const result = JSON.parse(window.AndroidBridge.getServerAppVersion())
+    if (result?.code === 0 && result?.version) {
+      serverAppVersion.value = result.version
+    }
+  } catch (error) {
+    console.error('getServerAppVersion failed', error)
   }
 })
 

@@ -6,17 +6,37 @@
         <span class="profile-label">用户名</span>
         <span class="profile-value">{{ userStore.user.username }}</span>
       </div>
+      <div class="profile-row">
+        <span class="profile-label">App版本</span>
+        <span class="profile-value">{{ appVersion }}</span>
+      </div>
     </div>
     <button type="button" class="logout-btn" @click="handleLogout">退出登录</button>
   </div>
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
+const appVersion = ref('--')
+
+onMounted(() => {
+  try {
+    if (typeof window === 'undefined' || !window.AndroidBridge || !window.AndroidBridge.getAppVersion) {
+      return
+    }
+    const result = JSON.parse(window.AndroidBridge.getAppVersion())
+    if (result?.code === 0 && result?.version) {
+      appVersion.value = result.version
+    }
+  } catch (error) {
+    console.error('getAppVersion failed', error)
+  }
+})
 
 function handleLogout() {
   userStore.logout()
@@ -50,6 +70,11 @@ function handleLogout() {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-row:last-child {
+  margin-bottom: 0;
 }
 
 .profile-label {

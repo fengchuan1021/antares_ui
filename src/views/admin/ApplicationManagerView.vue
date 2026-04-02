@@ -50,17 +50,17 @@
                 <Checkbox v-model="app.whitelist" :binary="true" :input-id="`whitelist-${app.packageName}`" />
                 <label :for="`whitelist-${app.packageName}`" class="text-sm cursor-pointer">白名单</label>
               </div>
-              <div class="flex items-center gap-1">
+              <!-- <div class="flex items-center gap-1">
                 <Checkbox v-model="app.backupData" :binary="true" :input-id="`backup-${app.packageName}`" />
                 <label :for="`backup-${app.packageName}`" class="text-sm cursor-pointer">备份数据</label>
-              </div>
-              <!-- <Button
-                label="分类"
-                icon="pi pi-folder"
+              </div> -->
+              <Button
+                label=""
+                icon="pi pi-upload"
                 text
                 size="small"
-                @click="openScriptCategoryDialog(app)"
-              /> -->
+                @click="uploadtoserver(app)"
+              />
             </div>
           </div>
         </template>
@@ -118,7 +118,7 @@ const loadInstalledApps = async () => {
   loading.value = true
   errorMsg.value = ''
   try {
-    const json = window.AndroidBridge.getInstalledApps()
+    const json = window.AndroidBridge.getInstalledApps(false)
     const res = JSON.parse(json)
     if (res.code === 0 && Array.isArray(res.data)) {
       const map = savedAppsMap.value
@@ -163,6 +163,29 @@ const saveApplications = async () => {
     errorMsg.value = e?.response?.data?.error || e?.message || '保存失败'
   } finally {
     saving.value = false
+  }
+}
+
+const uploadtoserver = async (app) => {
+  try {
+    const payload = {
+      packageName: app.packageName,
+      name: app.name,
+    }
+    try {
+    const json = window.AndroidBridge.uploadapptoserver(app.packageName)
+    const res = JSON.parse(json)
+    if (res.code === 200 ) {
+      errorMsg.value = '后台上传中'
+    } else {
+      errorMsg.value = '上传失败'
+    }
+  } catch (e) {
+    errorMsg.value = e?.message || '读取失败'
+  }
+    successMsg.value = '上传成功'
+  } catch (e) {
+    errorMsg.value = e?.response?.data?.error || e?.message || '上传失败'
   }
 }
 

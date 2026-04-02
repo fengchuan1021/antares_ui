@@ -94,8 +94,8 @@
                  <div v-if="script.description" class="text-sm text-gray-500 truncate">
                    {{ script.description }}
                  </div>
-                 <div v-if="script.is_in_mi_market" class="text-sm text-gray-500 truncate">
-                   <Button style="width:1rem;height:1rem" icon="pi pi-cloud-download"  size="small" @click="handleDownloadApp(script.package_name)" />
+                 <div v-if="(script.is_in_mi_market || script.is_in_netdisk) && !script.is_installed" class="text-sm text-gray-500 truncate" @click.stop>
+                   <Button style="width:1rem;height:1rem" icon="pi pi-cloud-download"  size="small" @click="handleDownloadApp(script)" />
                  </div>
                </div>
              </div>
@@ -209,7 +209,7 @@ const error = ref('')
 const treeData = ref([])
 const activeCategoryId = ref(null)
 const selectedIds = ref(new Set())
-
+const installedApps=ref([])
 const currentCategory = computed(() =>
 treeData.value.find(c => c.id === activeCategoryId.value) ?? null
 )
@@ -252,25 +252,39 @@ function handleRestart() {
 try {
  const result = JSON.parse(window.AndroidBridge.reboot())
  if (result.code === 0) {
-   alert('重启命令已执行，设备即将重启')
+   //alert('重启命令已执行，设备即将重启')
  } else {
-   alert(result.msg || '重启失败')
+   //alert(result.msg || '重启失败')
  }
 } catch (e) {
  console.error('重启失败:', e)
- alert('重启失败: ' + (e?.message || '未知错误'))
+ //alert('重启失败: ' + (e?.message || '未知错误'))
 }
 }
-async function handleDownloadApp (packageName) {
-console.log("packgename",packageName)
+async function handleDownloadApp (script) {
+console.log("packgename",script.package_name)
+// window.alert(script.package_name);
+toast.add({
+     severity: 'success',
+     detail: `后台下载中，请稍后查看`,
+     life: 2000
+   })
 try {
- const result = JSON.parse(window.AndroidBridge.goToMiMarketDetail(packageName))
- if (result.code === 200) {
+ if(script.is_in_mi_market){
+   const result = JSON.parse(window.AndroidBridge.goToMiMarketDetail(script.package_name))
+   if (result.code === 200) {
+ 
+   } else {
 
- } else {
+   }
+ }else if(script.is_in_netdisk){
+   const result = JSON.parse(window.AndroidBridge.downloadAppFromNetdisk(script.package_name))
+   if (result.code === 200) {
 
- }
-} catch (e) {
+   } else {
+
+   }
+}} catch (e) {
  console.error('重启失败:', e)
 
 }
@@ -382,6 +396,13 @@ getDeviceExpireTime(serial.value).then(ret=>{
 })
 })
 onMounted(async () => {
+try{
+ const json = window.AndroidBridge.getInstalledApps(true)
+ const res = JSON.parse(json)
+ if (res.code === 0 && Array.isArray(res.data)) {
+   installedApps.value = res.data
+ }
+}catch(e){}
 try {
  loading.value = true
  error.value = ''
@@ -397,6 +418,14 @@ try {
  if (treeData.value.length > 0 && !activeCategoryId.value) {
    activeCategoryId.value = treeData.value[0].id
  }
+ treeData.value.forEach(item=>{
+   item.scripts.forEach(script=>{
+     console.log("script.package_name",script.package_name)
+     script.is_installed = installedApps.value.some(app=>app.packageName === script.package_name)
+     console.log("script.is_installed",script.is_installed)
+   })
+ })
+
 } catch (e) {
  error.value = e?.response?.data?.error || e?.message || '加载失败'
 } finally {

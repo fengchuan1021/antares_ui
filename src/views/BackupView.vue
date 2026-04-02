@@ -104,7 +104,7 @@ async function loadApps() {
   errorMsg.value = ''
   successMsg.value = ''
   try {
-    const json = window.AndroidBridge.getInstalledApps()
+    const json = window.AndroidBridge.getInstalledApps(false)
     const res = JSON.parse(json)
     if (res.code === 0 && Array.isArray(res.data)) {
       apps.value = res.data

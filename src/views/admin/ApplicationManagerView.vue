@@ -1,5 +1,5 @@
 <template>
-  <div class="application-manager-view p-4">
+  <div class="application-manager-view p-2">
     <div class="flex gap-2 mb-4">
       <Button
         label="读取手机中已安装app"
@@ -27,6 +27,30 @@
     <Message v-else-if="!isInWebView && !apps.length" severity="info" :closable="false" class="mb-4">
       请在手机应用中打开此页面
     </Message>
+
+    <Dialog
+      v-model:visible="categoryPickerVisible"
+      header="选择分类"
+      modal
+      :style="{ width: '22rem' }"
+      @hide="onCategoryPickerHide"
+    >
+      <div class="flex flex-col gap-3">
+        <label class="text-sm opacity-80">分类</label>
+        <Select
+          v-model="pickedCategoryId"
+          :options="categoryList"
+          option-label="name"
+          option-value="id"
+          placeholder="请选择分类"
+          class="w-full"
+        />
+        <div class="flex justify-end gap-2 pt-2">
+          <Button label="取消" severity="secondary" text @click="categoryPickerVisible = false" />
+          <Button label="确定" :loading="addToCategoryLoading" :disabled="pickedCategoryId == null" @click="confirmAddToCategory" />
+        </div>
+      </div>
+    </Dialog>
 
     <div v-if="apps.length" class="app-list space-y-2">
       <Card v-for="app in apps" :key="app.packageName" class="app-item">
@@ -61,6 +85,13 @@
                 size="small"
                 @click="uploadtoserver(app)"
               />
+              <Button
+                label=""
+                icon="pi pi-plus"
+                text
+                size="small"
+                @click="addtoCategory(app)"
+              />
             </div>
           </div>
         </template>
@@ -79,6 +110,7 @@ import Checkbox from 'primevue/checkbox'
 import Select from 'primevue/select'
 import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
+import { getScriptCategories, addScriptToCategory } from '../../api/script'
 import { getApplications, saveApplications as saveAppsApi } from '../../api/application'
 
 
@@ -107,8 +139,62 @@ async function loadSavedApplications() {
     savedAppsMap.value = {}
   }
 }
+const categoryList = ref([])
+const categoryPickerVisible = ref(false)
+const pickedCategoryId = ref(null)
+const addToCategoryLoading = ref(false)
+const appPendingCategory = ref(null)
 
+const getCategoryList = async () => {
+  try {
+    const res = await getScriptCategories()
+    categoryList.value = res?.data ?? []
+  } catch (_) {
+    categoryList.value = []
+  }
+}
 
+function onCategoryPickerHide() {
+  appPendingCategory.value = null
+  pickedCategoryId.value = null
+}
+
+const addtoCategory = async (app) => {
+  errorMsg.value = ''
+  successMsg.value = ''
+  if (!categoryList.value.length) {
+    await getCategoryList()
+  }
+  if (!categoryList.value.length) {
+    errorMsg.value = '暂无脚本分类，请先在脚本分类管理中创建'
+    return
+  }
+  appPendingCategory.value = app
+  pickedCategoryId.value = null
+  categoryPickerVisible.value = true
+}
+
+const confirmAddToCategory = async () => {
+  const app = appPendingCategory.value
+  if (!app || pickedCategoryId.value == null) return
+  addToCategoryLoading.value = true
+  errorMsg.value = ''
+  successMsg.value = ''
+  try {
+    await addScriptToCategory({
+      name: app.name,
+      category_id: pickedCategoryId.value,
+      icon_base64: app.iconBase64 || '',
+      package_name: app.packageName || '',
+    })
+    successMsg.value = '已添加到分类'
+    categoryPickerVisible.value = false
+  } catch (e) {
+    errorMsg.value = e?.response?.data?.error || e?.message || '添加失败'
+  } finally {
+    addToCategoryLoading.value = false
+  }
+}
 const loadInstalledApps = async () => {
   if (!isInWebView.value) {
     errorMsg.value = '请在手机应用中打开此页面'
@@ -199,7 +285,7 @@ onMounted(() => {
   background: transparent;
 }
 .app-item :deep(.p-card-content) {
-  padding: 0.75rem 1rem;
+  padding: 0.25rem;
 }
 .app-item :deep(.p-card) {
   margin-bottom: 0;

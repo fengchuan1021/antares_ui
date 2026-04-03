@@ -11,20 +11,90 @@
         <span class="profile-value">current:{{ appVersion }} server:{{ serverAppVersion }} </span>
       </div>
     </div>
+    <div class="profile-card">
+      <div class="">
+        <span class="profile-value">
+          <Tag v-for="app in backup_selected_apps" :key="app.packageName">{{ app.name }}</Tag>
+        <Button icon="pi pi-file-edit" size="small" @click="AddApp" class="ml-2"></Button>
+        </span>
+      </div>
+      <div class="mt-2">
+        <span class="profile-label"><Button  size="small" @click="handleBackup">一键备份</Button></span>
+        
+      </div>
+    </div>
+
+
+    <Dialog
+      v-model:visible="showBackupAppPicker"
+      header="选择备份应用"
+      modal
+      :style="{ width: 'min(92vw, 420px)' }"
+      :dismissable-mask="true"
+    >
+      <div v-if="!installedApps.length" class="backup-app-picker-empty">暂无已安装应用数据，请在 App 内打开并重试</div>
+      <div v-else class="backup-app-picker-list">
+        <label
+          v-for="app in installedApps"
+          :key="app.packageName"
+          class="backup-app-picker-row"
+        >
+          <Checkbox
+            :model-value="pickerSelected.has(app.packageName)"
+            :binary="true"
+            :input-id="`pick-${app.packageName}`"
+            @update:model-value="() => togglePickerApp(app.packageName)"
+          />
+          <span class="backup-app-picker-name">{{ app.name }}</span>
+        </label>
+      </div>
+      <template #footer>
+        <Button label="取消" text @click="showBackupAppPicker = false" />
+        <Button label="确定" @click="confirmBackupAppPicker" />
+      </template>
+    </Dialog>
+
     <button type="button" class="logout-btn" @click="handleLogout">退出登录</button>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-
-const router = useRouter()
-const userStore = useUserStore()
+import Button from 'primevue/button'
+import Tag from 'primevue/tag'
+import Dialog from 'primevue/dialog'
+import Checkbox from 'primevue/checkbox'
+import { backupApps,listBackups } from '../api/backup'
 const appVersion = ref('--')
 const serverAppVersion = ref('--')
-onMounted(async () => {
+const serial=ref('')
+const installedApps = ref([])
+const backup_selected_apps = ref([
+  { packageName: 'com.tencent.mm', name: '微信' },
+  { packageName: 'com.eg.android.AlipayGphone', name: '支付宝' },
+  { packageName: 'com.tencent.mobileqq', name: 'QQ' },
+])
+
+const showBackupAppPicker = ref(false)
+const pickerSelected = ref(new Set())
+
+function loadInstalledApps() {
+  try {
+    if (typeof window === 'undefined' || !window.AndroidBridge?.getInstalledApps) return
+    const json = window.AndroidBridge.getInstalledApps(true)
+    const res = JSON.parse(json)
+    if (res.code === 0 && Array.isArray(res.data)) {
+      installedApps.value = res.data
+    }
+  } catch (e) {}
+}
+
+onMounted(() => {
+  try{
+    serial.value = window.AndroidBridge.getSerial()
+  }catch(e){}
   try {
     if (typeof window === 'undefined' || !window.AndroidBridge || !window.AndroidBridge.getAppVersion) {
       return
@@ -47,7 +117,58 @@ onMounted(async () => {
   } catch (error) {
     console.error('getServerAppVersion failed', error)
   }
+  loadInstalledApps()
 })
+
+function togglePickerApp(packageName) {
+  const next = new Set(pickerSelected.value)
+  if (next.has(packageName)) next.delete(packageName)
+  else next.add(packageName)
+  pickerSelected.value = next
+}
+
+function AddApp() {
+  loadInstalledApps()
+  const next = new Set()
+  for (const a of backup_selected_apps.value) {
+    if (a?.packageName) next.add(a.packageName)
+  }
+  pickerSelected.value = next
+  showBackupAppPicker.value = true
+}
+
+function confirmBackupAppPicker() {
+  const sel = pickerSelected.value
+  const list = installedApps.value
+    .filter((app) => sel.has(app.packageName))
+    .map((app) => ({
+      packageName: app.packageName,
+      name: app.name || app.packageName,
+    }))
+  backup_selected_apps.value = list
+  showBackupAppPicker.value = false
+}
+
+function handleBackup() {
+  if (typeof window === 'undefined' || !window.AndroidBridge?.backupApps) return
+  const pkgs = backup_selected_apps.value.map((a) => a.packageName).filter(Boolean)
+  if (!pkgs.length) return
+  try {
+    backupApps(serial.value,pkgs);
+  } catch (e) {}
+}
+
+const handleFixEnvironment = () => {
+  try {
+    const result = JSON.parse(window.AndroidBridge.fixEnvironment())
+    if (result.code === 200) {
+    } else {
+    }
+  } catch (e) {}
+}
+
+const router = useRouter()
+const userStore = useUserStore()
 
 function handleLogout() {
   userStore.logout()
@@ -81,11 +202,6 @@ function handleLogout() {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.profile-row:last-child {
-  margin-bottom: 0;
 }
 
 .profile-label {
@@ -121,5 +237,40 @@ function handleLogout() {
 
 .logout-btn:active {
   opacity: 0.9;
+}
+
+.backup-app-picker-empty {
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+  color: rgba(59, 43, 16, 0.65);
+}
+
+.backup-app-picker-list {
+  max-height: min(55vh, 360px);
+  overflow-y: auto;
+  margin: 0 -0.25rem;
+  padding-right: 0.25rem;
+}
+
+.backup-app-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.35rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.backup-app-picker-row:hover {
+  background: rgba(244, 199, 105, 0.2);
+}
+
+.backup-app-picker-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #3b2b10;
+  word-break: break-word;
 }
 </style>

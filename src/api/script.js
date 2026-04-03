@@ -27,3 +27,8 @@ export function updateScriptCategory(id, data) {
 export function deleteScriptCategory(id) {
   return request.delete(`/api/script_categories/${id}`)
 }
+
+/** 从已安装应用添加到脚本分类（名称、base64 图标、分类 id、包名） */
+export function addScriptToCategory(data) {
+  return request.post('/api/scripts/AddScriptToCategory', data)
+}

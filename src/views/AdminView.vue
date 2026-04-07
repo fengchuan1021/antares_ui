@@ -42,8 +42,6 @@ import AddUserView from './admin/AddUserView.vue'
 import DeviceActivationView from './admin/DeviceActivationView.vue'
 import DomainBlacklistView from './admin/DomainBlacklistView.vue'
 import CustomerManagementView from './admin/CustomerManagementView.vue'
-import QuNaTaskAddView from './admin/QuNaTaskAddView.vue'
-import QuNaTaskStatusView from './admin/QuNaTaskStatusView.vue'
 
 const menuItems = [
   { id: 'app', label: 'app管理', icon: 'pi-mobile', component: ApplicationManagerView },
@@ -51,8 +49,6 @@ const menuItems = [
   // { id: 'script', label: '脚本管理', icon: 'pi-code', component: ScriptManagerView },
   // { id: 'user', label: '添加用户', icon: 'pi-user-plus', component: AddUserView },
   { id: 'device', label: '设备激活续费', icon: 'pi-tablet', component: DeviceActivationView },
-  { id: 'qunaAdd', label: '添加去哪儿任务', icon: 'pi-tasks', component: QuNaTaskAddView },
-  { id: 'qunaStatus', label: '去哪儿任务状态', icon: 'pi-tasks', component: QuNaTaskStatusView },
   // { id: 'domain', label: '域名黑名单', icon: 'pi-ban', component: DomainBlacklistView },
   // { id: 'customer', label: '客户管理', icon: 'pi-users', component: CustomerManagementView }
 ]

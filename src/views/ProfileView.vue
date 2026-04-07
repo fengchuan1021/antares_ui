@@ -24,6 +24,28 @@
       </div>
     </div>
 
+    <div class="profile-card">
+      <div class="">
+        <span class="profile-value">
+   
+        <Button  size="small" @click="handleChunqiuCheck" class="ml-2">春秋检测</Button>
+        </span>
+      </div>
+     
+    </div>
+
+    <div class="profile-card profile-note-card">
+      <div class="profile-row profile-note-header">
+        <span class="profile-label">记事本</span>
+      </div>
+      <Textarea
+        v-model="profileNote"
+        class="profile-note-textarea"
+        placeholder="在此输入备忘…"
+        :auto-resize="true"
+        rows="5"
+      />
+    </div>
 
     <Dialog
       v-model:visible="showBackupAppPicker"
@@ -59,14 +81,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
 import { useUserStore } from '../stores/user'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Dialog from 'primevue/dialog'
 import Checkbox from 'primevue/checkbox'
+import Textarea from 'primevue/textarea'
 import { backupApps,listBackups } from '../api/backup'
+import { saveProfileNote, getProfileNote } from '../api/device'
 const appVersion = ref('--')
 const serverAppVersion = ref('--')
 const serial=ref('')
@@ -80,6 +105,37 @@ const backup_selected_apps = ref([
 const showBackupAppPicker = ref(false)
 const pickerSelected = ref(new Set())
 
+
+const profileNote = ref('')
+
+watch(profileNote, (v) => {
+  try {
+   saveProfileNote(serial.value, v).then(res => {
+    console.log('111')
+   })
+  } catch (e) {}
+})
+
+const CHUNQIU_CHECK_DEBOUNCE_MS = 5000
+let lastChunqiuCheckAt = 0
+const toast = useToast()
+
+const handleChunqiuCheck = () => {
+  if (typeof window === 'undefined' || !window.AndroidBridge?.chunqiuCheck) return
+  const now = Date.now()
+  if (lastChunqiuCheckAt !== 0 && now - lastChunqiuCheckAt < CHUNQIU_CHECK_DEBOUNCE_MS) {
+    toast.add({
+      severity: 'info',
+      detail: '后台处理中',
+      life: 2000,
+    })
+    return
+  }
+  lastChunqiuCheckAt = now
+  try {
+    window.AndroidBridge.chunqiuCheck()
+  } catch (e) {}
+}
 function loadInstalledApps() {
   try {
     if (typeof window === 'undefined' || !window.AndroidBridge?.getInstalledApps) return
@@ -95,6 +151,12 @@ onMounted(() => {
   try{
     serial.value = window.AndroidBridge.getSerial()
   }catch(e){}
+  try {
+    getProfileNote(serial.value).then(res => {
+      profileNote.value = res.data || ""
+    })
+  } catch (e) {}
+ 
   try {
     if (typeof window === 'undefined' || !window.AndroidBridge || !window.AndroidBridge.getAppVersion) {
       return
@@ -272,5 +334,16 @@ function handleLogout() {
   font-weight: 500;
   color: #3b2b10;
   word-break: break-word;
+}
+
+.profile-note-card .profile-note-header {
+  margin-bottom: 0.65rem;
+}
+
+.profile-note-textarea {
+  width: 100%;
+  min-height: 7rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 </style>

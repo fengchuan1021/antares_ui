@@ -15,3 +15,10 @@ export function updateDevice(id, data) {
 export function getDeviceExpireTime(serial){
   return request.get(`/api/devices/expireTime?serial=${serial}`)
 }
+
+export function saveProfileNote(serial, note) {
+  return request.post(`/api/devices/save_profile_note?serial=${serial}`, { note })
+}
+export function getProfileNote(serial) {
+  return request.get(`/api/devices/get_profile_note?serial=${serial}`)
+}

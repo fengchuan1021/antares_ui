@@ -22,3 +22,6 @@ export function saveProfileNote(serial, note) {
 export function getProfileNote(serial) {
   return request.get(`/api/devices/get_profile_note?serial=${serial}`)
 }
+export function resetDevice(serial) {
+  return request.post(`/api/devices/reset_device/${serial}`)
+}

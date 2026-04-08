@@ -11,7 +11,7 @@
         <span class="profile-value">current:{{ appVersion }} server:{{ serverAppVersion }} </span>
       </div>
     </div>
-    <div class="profile-card">
+   <!--<div class="profile-card">
       <div class="">
         <span class="profile-value">
           <Tag v-for="app in backup_selected_apps" :key="app.packageName">{{ app.name }}</Tag>
@@ -21,6 +21,13 @@
       <div class="mt-2">
         <span class="profile-label"><Button  size="small" @click="handleBackup">一键备份</Button></span>
         
+      </div>
+    </div>--> 
+    <div class="profile-card">
+      <div class="">
+        <span class="profile-value">
+          <Button icon="pi pi-replay" size="small" @click="handleResetDevice" class="ml-2">重置设备</Button>
+        </span>
       </div>
     </div>
 
@@ -91,7 +98,7 @@ import Dialog from 'primevue/dialog'
 import Checkbox from 'primevue/checkbox'
 import Textarea from 'primevue/textarea'
 import { backupApps,listBackups } from '../api/backup'
-import { saveProfileNote, getProfileNote } from '../api/device'
+import { saveProfileNote, getProfileNote,resetDevice } from '../api/device'
 const appVersion = ref('--')
 const serverAppVersion = ref('--')
 const serial=ref('')
@@ -119,7 +126,11 @@ watch(profileNote, (v) => {
 const CHUNQIU_CHECK_DEBOUNCE_MS = 5000
 let lastChunqiuCheckAt = 0
 const toast = useToast()
-
+const handleResetDevice=()=>{
+  try{
+    resetDevice(serial.value);
+  }catch(e){}
+}
 const handleChunqiuCheck = () => {
   if (typeof window === 'undefined' || !window.AndroidBridge?.chunqiuCheck) return
   const now = Date.now()

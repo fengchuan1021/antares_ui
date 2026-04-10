@@ -180,7 +180,17 @@ const confirmAddToCategory = async () => {
   addToCategoryLoading.value = true
   errorMsg.value = ''
   successMsg.value = ''
+  try{
+    if(!app.iconBase64){
+      const json = window.AndroidBridge.getAppIcon(app.packageName)
+      const res = JSON.parse(json)
+      if (res.code === 0 && res.data) {
+        app.iconBase64 = res.data
+      }
+    }
+  }catch(e){}
   try {
+
     await addScriptToCategory({
       name: app.name,
       category_id: pickedCategoryId.value,

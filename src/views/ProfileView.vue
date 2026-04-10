@@ -35,6 +35,17 @@
       <div class="">
         <span class="profile-value">
    
+        <span>开发者选项</span>
+        <ToggleSwitch
+          :model-value="developerModeEnabled"
+          class="ml-2"
+          @update:model-value="switchDeveloperMode"
+        />
+        </span>
+      </div>
+      <div class="">
+        <span class="profile-value">
+   
         <Button  size="small" @click="handleChunqiuCheck" class="ml-2">春秋检测</Button>
         </span>
       </div>
@@ -97,11 +108,13 @@ import Tag from 'primevue/tag'
 import Dialog from 'primevue/dialog'
 import Checkbox from 'primevue/checkbox'
 import Textarea from 'primevue/textarea'
+import ToggleSwitch from 'primevue/toggleswitch'
 import { backupApps,listBackups } from '../api/backup'
 import { saveProfileNote, getProfileNote,resetDevice } from '../api/device'
 const appVersion = ref('--')
 const serverAppVersion = ref('--')
 const serial=ref('')
+const developerModeEnabled = ref(false)
 const installedApps = ref([])
 const backup_selected_apps = ref([
   { packageName: 'com.tencent.mm', name: '微信' },
@@ -131,6 +144,17 @@ const handleResetDevice=()=>{
     resetDevice(serial.value);
   }catch(e){}
 }
+
+function switchDeveloperMode(value) {
+  const enabled = Boolean(value)
+  developerModeEnabled.value = enabled
+  try {
+  
+    if (typeof window !== 'undefined' && window.AndroidBridge?.setDeveloperMode) {
+      window.AndroidBridge.setDeveloperMode(enabled)
+    }
+  } catch (e) {}
+}
 const handleChunqiuCheck = () => {
   if (typeof window === 'undefined' || !window.AndroidBridge?.chunqiuCheck) return
   const now = Date.now()
@@ -159,6 +183,13 @@ function loadInstalledApps() {
 }
 
 onMounted(() => {
+  try {
+    const json = window.AndroidBridge.getDeveloperMode()
+    const res = JSON.parse(json)
+    if (res.code === 0 && res.enabled !== undefined) {
+      developerModeEnabled.value = res.enabled
+    }
+  } catch (e) {}
   try{
     serial.value = window.AndroidBridge.getSerial()
   }catch(e){}

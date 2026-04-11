@@ -26,7 +26,9 @@
     <div class="profile-card">
       <div class="">
         <span class="profile-value">
-          <Button icon="pi pi-replay" size="small" @click="handleResetDevice" class="ml-2">重置设备</Button>
+        
+          <Button icon="pi pi-replay" size="small" @click="handleResetDevice" class="ml-2" style="width:100px">重置设备</Button>
+     
         </span>
       </div>
     </div>
@@ -99,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useUserStore } from '../stores/user'
@@ -128,12 +130,30 @@ const pickerSelected = ref(new Set())
 
 const profileNote = ref('')
 
-watch(profileNote, (v) => {
-  try {
-   saveProfileNote(serial.value, v).then(res => {
-    console.log('111')
-   })
-  } catch (e) {}
+const PROFILE_NOTE_SAVE_DEBOUNCE_MS = 5000
+let profileNoteSaveTimer = null
+/** 从接口回填 v-model 时不应触发保存 */
+let profileNoteHydrating = false
+
+watch(profileNote, () => {
+  if (profileNoteHydrating) return
+  if (profileNoteSaveTimer !== null) {
+    clearTimeout(profileNoteSaveTimer)
+    profileNoteSaveTimer = null
+  }
+  profileNoteSaveTimer = setTimeout(() => {
+    profileNoteSaveTimer = null
+    try {
+      saveProfileNote(serial.value, profileNote.value)
+    } catch (e) {}
+  }, PROFILE_NOTE_SAVE_DEBOUNCE_MS)
+})
+
+onUnmounted(() => {
+  if (profileNoteSaveTimer !== null) {
+    clearTimeout(profileNoteSaveTimer)
+    profileNoteSaveTimer = null
+  }
 })
 
 const CHUNQIU_CHECK_DEBOUNCE_MS = 5000
@@ -194,8 +214,14 @@ onMounted(() => {
     serial.value = window.AndroidBridge.getSerial()
   }catch(e){}
   try {
-    getProfileNote(serial.value).then(res => {
-      profileNote.value = res.data || ""
+    getProfileNote(serial.value).then(async (res) => {
+      profileNoteHydrating = true
+      try {
+        profileNote.value = res.data || ''
+        await nextTick()
+      } finally {
+        profileNoteHydrating = false
+      }
     })
   } catch (e) {}
  

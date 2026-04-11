@@ -126,7 +126,12 @@
 
     <div class="execute-bar fixed bottom-14 left-0 right-0 flex items-end gap-2 p-2 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50">
       <div class="flex-1 grid grid-cols-2 gap-2 min-w-0">
-        <div class="min-w-0 flex flex-col gap-2 overflow-hidden">
+        <div
+          ref="execColTimeEl"
+          class="min-w-0 flex flex-col gap-2 overflow-hidden"
+          @mousedown.capture="(e) => onExecInputColBeforePointer(e, 'time')"
+          @touchstart.capture="(e) => onExecInputColBeforePointer(e, 'time')"
+        >
           <label class="text-sm text-gray-600 dark:text-gray-400">执行分钟</label>
           <InputNumber
             v-model="executeTime"
@@ -134,10 +139,17 @@
             placeholder="分钟"
             show-buttons
             button-layout="horizontal"
+            :pt="executeTimeInputNumberPt"
             class="w-full min-w-0 max-w-full [&_.p-inputnumber]:min-w-0 [&_.p-inputnumber]:max-w-full"
+            @blur="() => onExecInputNumberBlur('time')"
           />
         </div>
-        <div class="min-w-0 flex flex-col gap-2 overflow-hidden">
+        <div
+          ref="execColRoundsEl"
+          class="min-w-0 flex flex-col gap-2 overflow-hidden"
+          @mousedown.capture="(e) => onExecInputColBeforePointer(e, 'rounds')"
+          @touchstart.capture="(e) => onExecInputColBeforePointer(e, 'rounds')"
+        >
           <label class="text-sm text-gray-600 dark:text-gray-400">执行轮数</label>
           <InputNumber
             v-model="executeRounds"
@@ -145,7 +157,9 @@
             placeholder="轮"
             show-buttons
             button-layout="horizontal"
+            :pt="executeRoundsInputNumberPt"
             class="w-full min-w-0 max-w-full [&_.p-inputnumber]:min-w-0 [&_.p-inputnumber]:max-w-full"
+            @blur="() => onExecInputNumberBlur('rounds')"
           />
         </div>
       </div>
@@ -187,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import Listbox from 'primevue/listbox'
 import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
@@ -219,6 +233,67 @@ const selectedScripts = computed(() => Array.from(selectedScriptsMap.value.value
 
 const executeTime = ref(40)
 const executeRounds = ref(1)
+
+const execColTimeEl = ref(null)
+const execColRoundsEl = ref(null)
+/** false：inputmode none（按加减 focus 时不弹软键盘）；true：numeric（点在数字框上要能输入） */
+const execInputKeyboardMode = reactive({ time: false, rounds: false })
+
+function isInputNumberStepButtonTarget(el) {
+  return !!(
+    el &&
+    typeof el.closest === 'function' &&
+    (el.closest('.p-inputnumber-increment-button') || el.closest('.p-inputnumber-decrement-button'))
+  )
+}
+
+function getExecInputColEl(key) {
+  return key === 'time' ? execColTimeEl.value : execColRoundsEl.value
+}
+
+function setExecInputColInputmode(colEl, mode) {
+  if (!colEl) return
+  const input =
+    colEl.querySelector('input.p-inputnumber-input') ||
+    colEl.querySelector('.p-inputnumber input')
+  if (input instanceof HTMLInputElement) {
+    input.setAttribute('inputmode', mode)
+  }
+}
+
+/** 在 PrimeVue mousedown 把焦点塞进 input 之前同步改 inputmode（仅靠 blur 在部分 WebView 无效） */
+function onExecInputColBeforePointer(e, key) {
+  const col = e.currentTarget
+  const t = e.target
+  if (isInputNumberStepButtonTarget(t)) {
+    execInputKeyboardMode[key] = false
+    setExecInputColInputmode(col, 'none')
+  } else if (!t.closest?.('.p-inputnumber-button')) {
+    execInputKeyboardMode[key] = true
+    setExecInputColInputmode(col, 'numeric')
+  }
+}
+
+function onExecInputNumberBlur(key) {
+  execInputKeyboardMode[key] = false
+  setExecInputColInputmode(getExecInputColEl(key), 'none')
+}
+
+const executeTimeInputNumberPt = computed(() => ({
+  pcInputText: {
+    root: {
+      inputmode: execInputKeyboardMode.time ? 'numeric' : 'none'
+    }
+  }
+}))
+
+const executeRoundsInputNumberPt = computed(() => ({
+  pcInputText: {
+    root: {
+      inputmode: execInputKeyboardMode.rounds ? 'numeric' : 'none'
+    }
+  }
+}))
 const serial = ref('')
 const EXECUTE_COOLDOWN_SEC = 5
 const lastExecuteTime = ref(0)

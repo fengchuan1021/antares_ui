@@ -59,7 +59,7 @@ const handleLogin = async () => {
     const res = await login(username.value, password.value)
     localStorage.setItem('token', res.data.token)
     try {
-      const result = JSON.parse(window.AndroidBridge.setToken(res.data.token))
+      const result = JSON.parse(window.AndroidBridge.setToken(res.data.token,res.data.user.id))
       if (result.code === 0) {
        
       } else {

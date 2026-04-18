@@ -11,7 +11,7 @@
         <span class="profile-value">current:{{ appVersion }} server:{{ serverAppVersion }} </span>
       </div>
     </div>
-   <!--<div class="profile-card">
+   <!-- <div class="profile-card">
       <div class="">
         <span class="profile-value">
           <Tag v-for="app in backup_selected_apps" :key="app.packageName">{{ app.name }}</Tag>
@@ -22,7 +22,7 @@
         <span class="profile-label"><Button  size="small" @click="handleBackup">一键备份</Button></span>
         
       </div>
-    </div>--> 
+    </div>  -->
     <div class="profile-card">
       <div class="">
         <span class="profile-value">
@@ -52,9 +52,29 @@
         </span>
       </div>
      
+
+      <div class="profile-row">
+        <span class="profile-label">单个ip下最多同时运行设备数</span>
+        <span class="profile-value">  <InputText
+        v-model="maxDevices"
+        type="number"
+        class="profile-note-inputtext w-full"
+
+        placeholder="0不限制"
+        /></span>
+      </div>  
     </div>
 
     <div class="profile-card profile-note-card">
+      <div class="profile-row">
+        <span class="profile-label">编号</span>
+        <span class="profile-value">  <InputText
+        v-model="profileSerial"
+        class="profile-note-inputtext"
+        placeholder="在此输入编号"
+       
+      /></span> 
+      </div>
       <div class="profile-row profile-note-header">
         <span class="profile-label">记事本</span>
       </div>
@@ -110,13 +130,16 @@ import Tag from 'primevue/tag'
 import Dialog from 'primevue/dialog'
 import Checkbox from 'primevue/checkbox'
 import Textarea from 'primevue/textarea'
+import InputText from 'primevue/inputtext'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { backupApps,listBackups } from '../api/backup'
-import { saveProfileNote, getProfileNote,resetDevice } from '../api/device'
+import { saveProfileNote, getProfileNote,resetDevice,getProfileSerial,saveProfileSerial } from '../api/device'
+import { getIpGroupLimit, saveIpGroupLimit } from '../api/user'
 const appVersion = ref('--')
 const serverAppVersion = ref('--')
 const serial=ref('')
 const developerModeEnabled = ref(false)
+
 const installedApps = ref([])
 const backup_selected_apps = ref([
   { packageName: 'com.tencent.mm', name: '微信' },
@@ -129,12 +152,39 @@ const pickerSelected = ref(new Set())
 
 
 const profileNote = ref('')
-
+const profileSerial=ref('')
+const maxDevices=ref(null)
 const PROFILE_NOTE_SAVE_DEBOUNCE_MS = 5000
 let profileNoteSaveTimer = null
 /** 从接口回填 v-model 时不应触发保存 */
 let profileNoteHydrating = false
 
+const PROFILE_SERIAL_SAVE_DEBOUNCE_MS = 5000
+let profileSerialSaveTimer = null
+/** 从接口回填 v-model 时不应触发保存 */
+let profileSerialHydrating = false
+
+const MAX_DEVICES_SAVE_DEBOUNCE_MS = 5000
+let maxDevicesSaveTimer = null
+/** 从接口回填 v-model 时不应触发保存 */
+let maxDevicesHydrating = false
+watch(maxDevices, () => {
+  if (maxDevicesHydrating) return
+  if (maxDevicesSaveTimer !== null) {
+    clearTimeout(maxDevicesSaveTimer)
+    maxDevicesSaveTimer = null
+  }
+  maxDevicesSaveTimer = setTimeout(() => {
+    maxDevicesSaveTimer = null
+    try {
+      let tmp=parseInt(maxDevices.value)
+      if (isNaN(tmp)) {
+        tmp = 0
+      }
+      saveIpGroupLimit(uid.value, tmp)
+    } catch (e) {}
+  }, MAX_DEVICES_SAVE_DEBOUNCE_MS)
+})
 watch(profileNote, () => {
   if (profileNoteHydrating) return
   if (profileNoteSaveTimer !== null) {
@@ -148,11 +198,31 @@ watch(profileNote, () => {
     } catch (e) {}
   }, PROFILE_NOTE_SAVE_DEBOUNCE_MS)
 })
-
+watch(profileSerial, () => {
+  if (profileSerialHydrating) return
+  if (profileSerialSaveTimer !== null) {
+    clearTimeout(profileSerialSaveTimer)
+    profileSerialSaveTimer = null
+  }
+  profileSerialSaveTimer = setTimeout(() => {
+    profileSerialSaveTimer = null
+    try {
+      saveProfileSerial(serial.value, profileSerial.value)
+    } catch (e) {}
+  }, PROFILE_SERIAL_SAVE_DEBOUNCE_MS)
+})
 onUnmounted(() => {
   if (profileNoteSaveTimer !== null) {
     clearTimeout(profileNoteSaveTimer)
     profileNoteSaveTimer = null
+  }
+  if (maxDevicesSaveTimer !== null) {
+    clearTimeout(maxDevicesSaveTimer)
+    maxDevicesSaveTimer = null
+  }
+  if (profileSerialSaveTimer !== null) {
+    clearTimeout(profileSerialSaveTimer)
+    profileSerialSaveTimer = null
   }
 })
 
@@ -175,6 +245,7 @@ function switchDeveloperMode(value) {
     }
   } catch (e) {}
 }
+
 const handleChunqiuCheck = () => {
   if (typeof window === 'undefined' || !window.AndroidBridge?.chunqiuCheck) return
   const now = Date.now()
@@ -210,8 +281,31 @@ onMounted(() => {
       developerModeEnabled.value = res.enabled
     }
   } catch (e) {}
+  
   try{
     serial.value = window.AndroidBridge.getSerial()
+  }catch(e){}
+  try{
+    getProfileSerial(serial.value).then(async (res) => {
+      profileSerialHydrating = true
+      try {
+        profileSerial.value = res.data || ''
+        await nextTick()
+      } finally {
+        profileSerialHydrating = false
+      }
+    })
+  }catch(e){}
+  try{
+    getIpGroupLimit(uid.value).then(async (res) => {
+      maxDevicesHydrating = true
+      try {
+        maxDevices.value = res.data || ''
+        await nextTick()
+      } finally {
+        maxDevicesHydrating = false
+      }
+    })
   }catch(e){}
   try {
     getProfileNote(serial.value).then(async (res) => {
@@ -280,10 +374,11 @@ function confirmBackupAppPicker() {
 }
 
 function handleBackup() {
-  if (typeof window === 'undefined' || !window.AndroidBridge?.backupApps) return
+ 
   const pkgs = backup_selected_apps.value.map((a) => a.packageName).filter(Boolean)
   if (!pkgs.length) return
   try {
+    console.log("backup:",serial.value,pkgs)
     backupApps(serial.value,pkgs);
   } catch (e) {}
 }
@@ -299,7 +394,7 @@ const handleFixEnvironment = () => {
 
 const router = useRouter()
 const userStore = useUserStore()
-
+const uid = ref(userStore.user.id)
 function handleLogout() {
   userStore.logout()
   router.push('/login')

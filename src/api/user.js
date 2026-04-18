@@ -16,3 +16,9 @@ export function createUser(username, password) {
 export function activateUser(username) {
   return request.post('/api/user/activate', { username })
 }
+export function getIpGroupLimit(uid) {
+  return request.get(`/api/user/get_ip_group_limit?uid=${uid}`)
+}
+export function saveIpGroupLimit(uid, ipGroupLimit) {
+  return request.post(`/api/user/save_ip_group_limit?uid=${uid}`, { max_devices_per_ip: ipGroupLimit })
+}

@@ -24,13 +24,44 @@
       </div>
     </div>  -->
     <div class="profile-card">
-      <div class="">
+      <div>
+        <div class="profile-row">
+        <span class="profile-label">wifi id:</span>
+        <span class="profile-value">  <InputText
+        v-model="wifi_id"
+        class="profile-note-inputtext w-full"
+
+        placeholder=""
+        /></span>
+      </div> 
+      </div>
+      <div class="mt-2">
+        <div class="profile-row">
+        <span class="profile-label">wifi 密码:</span>
+        <span class="profile-value">  <InputText
+        v-model="wifi_password"
+      
+        class="profile-note-inputtext w-full"
+
+        placeholder=""
+        /></span>
+      </div> 
+      </div>
+      <div class="mt-2">
+        <div class="profile-row">
+        
+        <span class="profile-value"><Button icon="pi pi-save" size="small" @click="saveWifiConfig" class="ml-2" style="width:200px">写入wifi信息到固件</Button></span>
+      </div> 
+      </div>
+      <div class="mt-2">
+        <div class="profile-row"> 
         <span class="profile-value">
         
           <Button icon="pi pi-replay" size="small" @click="handleResetDevice" class="ml-2" style="width:100px">重置设备</Button>
      
         </span>
       </div>
+    </div>
     </div>
 
     <div class="profile-card">
@@ -234,7 +265,33 @@ const handleResetDevice=()=>{
     resetDevice(serial.value);
   }catch(e){}
 }
+const wifi_id=ref('')
+const wifi_password=ref('')
+const hardware_wifi_id=ref('')
+const hardware_wifi_password=ref('')
+function saveWifiConfig() {
+  try {
+    window.AndroidBridge.saveWifiConfig(wifi_id.value, wifi_password.value)
+  } catch (e) {}
+}
+function getwifi_config(){
+  try {
+    console.log("2222222222222222222")
+    const res1=window.AndroidBridge.getWifiConfig();
 
+    
+    console.log("3333333333333333333",res1)
+      const res = JSON.parse(res1)
+      console.log("save wifi config:",res)
+      if (res.code === 0) {
+        hardware_wifi_id.value = res.hardware_wifi_id
+        hardware_wifi_password.value = res.hardware_wifi_password
+        wifi_id.value = res.wifi_id
+        wifi_password.value = res.wifi_password
+      }
+      
+  } catch (e) {}
+}
 function switchDeveloperMode(value) {
   const enabled = Boolean(value)
   developerModeEnabled.value = enabled
@@ -341,7 +398,8 @@ onMounted(() => {
   } catch (error) {
     console.error('getServerAppVersion failed', error)
   }
-  loadInstalledApps()
+  getwifi_config();
+  //loadInstalledApps()
 })
 
 function togglePickerApp(packageName) {

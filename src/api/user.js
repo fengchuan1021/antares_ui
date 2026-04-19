@@ -3,6 +3,9 @@ import request from '../utils/request'
 export function login(username, password) {
   return request.post('/api/user/login', { username, password })
 }
+export function loginWithSerial(serial) {
+  return request.post('/api/user/loginWithSerial', { serial })
+}
 export function register(username, password) {
   return request.post('/api/user/register', { username, password })
 }

@@ -31,9 +31,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref,onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { login } from '../api/user'
+import { login,loginWithSerial } from '../api/user'
 import { useUserStore } from '../stores/user'
 
 const router = useRouter()
@@ -43,12 +43,43 @@ const password = ref('')
 const loading = ref(false)
 
 const errorMsg = ref('')
-
+const serial = ref('')
 // 如果从注册页跳转过来，自动填充用户名
 if (route.query.username) {
   username.value = route.query.username
 }
-
+onMounted(async()=>{
+  try{
+      serial.value = window.AndroidBridge.getSerial()
+    }catch(e){
+      serial.value=""
+    }
+    if(serial.value){
+      const res = await loginWithSerial(serial.value)
+      
+      try {
+        
+        if(!res || !res.data || !res.data.token || !res.data.user || !res.data.user.id){
+          return
+        }
+        localStorage.setItem('token', res.data.token)
+        const result = JSON.parse(window.AndroidBridge.setToken(res.data.token,res.data.user.id))
+        if (result.code === 0) {
+        
+        } else {
+        
+        }
+      } catch (e) {
+        console.error('设置token失败', e)
+      }
+      const userStore = useUserStore()
+      if (res?.data?.user) {
+        userStore.setUser(res.data.user)
+        router.push('/')
+      }
+      
+    }
+})
 const goRegister = () => {
   router.push('/register')
 }

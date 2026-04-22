@@ -15,6 +15,18 @@ const router = useRouter()
 
 onMounted(async () => {
   const token = localStorage.getItem('token')
+  // const serverUrl = localStorage.getItem('serverUrl')
+  // if(serverUrl){
+  //   try {
+  //     const result = JSON.parse(window.AndroidBridge.setServerUrl(serverUrl))
+  //     if (result.code === 0) {
+       
+  //     }
+  //   }
+  //   catch(e){
+  //     console.error('设置服务器地址失败', e)
+  //   }
+  // }
   if (!token) {
     router.push('/login')
     return

@@ -13,6 +13,17 @@
           <span class="menu-label" >{{ item.label }}</span>
           <i class="pi pi-chevron-right menu-arrow"></i>
         </div>
+
+        <div class="menu-item flex flex-col gap-2" >
+          <div class="menu-item-grid gap-4"> 
+          <i class="pi pi-server menu-icon"></i>
+            <span class="menu-label mr-2">本地服务器:</span>
+          </div>
+          <div class="menu-item-grid gap-2">
+            <InputText v-model="localServerUrl" />
+            <Button label="保存" icon="pi pi-save" @click="saveLocalServerUrl" />
+          </div>
+        </div>
       </div>
     </div>
     <div v-else class="menu-content mt-6">
@@ -33,8 +44,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import ApplicationManagerView from './admin/ApplicationManagerView.vue'
 import ScriptCategoryManagerView from './admin/ScriptCategoryManagerView.vue'
 import ScriptManagerView from './admin/ScriptManagerView.vue'
@@ -42,7 +54,27 @@ import AddUserView from './admin/AddUserView.vue'
 import DeviceActivationView from './admin/DeviceActivationView.vue'
 import DomainBlacklistView from './admin/DomainBlacklistView.vue'
 import CustomerManagementView from './admin/CustomerManagementView.vue'
-
+const localServerUrl=ref('')
+const saveLocalServerUrl=()=>{
+  localStorage.setItem('localServerUrl', localServerUrl.value)
+    
+  try {
+    const result2 = JSON.parse(window.AndroidBridge.setServerUrl(localServerUrl.value))
+    const result = JSON.parse(window.AndroidBridge.restartService())
+    if (result.code === 0) {
+      alert('重启服务命令已执行，服务即将重启')
+    } else {
+      
+    }
+  } catch (e) {
+    console.error('重启服务失败:', e)
+    alert('重启失败: ' + (e?.message || '未知错误'))
+  }
+}
+onMounted(()=>{
+  localServerUrl.value = localStorage.getItem('localServerUrl') || ''
+  
+})
 const menuItems = [
   { id: 'app', label: 'app管理', icon: 'pi-mobile', component: ApplicationManagerView },
   //{ id: 'scriptCategory', label: '脚本分类', icon: 'pi-folder', component: ScriptCategoryManagerView },
@@ -96,6 +128,13 @@ const currentComponent = computed(() => {
   flex: 1;
   font-size: 1rem;
   font-weight: 500;
+}
+.menu-item-grid {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
 }
 .menu-arrow {
   font-size: 0.875rem;
